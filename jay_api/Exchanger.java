@@ -66,7 +66,6 @@ public class Exchanger {
 			
 		if (GrandExchange.close()) {
 			jGeneral.defaultDynamicSleep();
-
 			return true;
 		}
 		
