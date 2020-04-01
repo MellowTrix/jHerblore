@@ -19,10 +19,8 @@ public class Banker {
 	
 	public static boolean openBankBooth() {
 		if (!Banking.isBankScreenOpen()) {
-			if(GrandExchange.getWindowState() != null)
-				if (!Exchanger.close())
-					return false;
-			
+			if(GrandExchange.getWindowState() != null && !Exchanger.close())
+				return false;			
 			
 			if(!jGeneral.deselect())
 				return false;
@@ -42,9 +40,8 @@ public class Banker {
 	
 	public static boolean openBankBanker() {
 		if (!Banking.isBankScreenOpen()) {
-			if(GrandExchange.getWindowState() != null)
-				if (!Exchanger.close())
-					return false;			
+			if(GrandExchange.getWindowState() != null && !Exchanger.close())
+				return false;			
 			
 			if(!jGeneral.deselect())
 				return false;
@@ -64,9 +61,8 @@ public class Banker {
 	
 	public static boolean openBank() {
 		if (!Banking.isBankScreenOpen()) {
-			if(GrandExchange.getWindowState() != null)
-				if (!Exchanger.close())
-					return false;
+			if(GrandExchange.getWindowState() != null && !Exchanger.close())
+				return false;
 			
 			if(!jGeneral.deselect())
 				return false;
@@ -101,7 +97,6 @@ public class Banker {
 	public static boolean close() {
 		if (Banking.close()) {
 			jGeneral.defaultDynamicSleep();
-
 			return true;
 		}
 		
@@ -138,16 +133,14 @@ public class Banker {
 			return false;
 		}
 			
-		if (!openBank())
+		if (!openBank() || !isBankLoaded())
 			return false;
 		
-		if (!isBankLoaded())
-			return false;
-		
-		if (handlerXML.setup_depositing_equipment)
+		if (handlerXML.setup_depositing_equipment) {
 			Banking.depositEquipment();
+			jGeneral.defaultDynamicSleep();
+		}
 
-		jGeneral.defaultDynamicSleep();
 		return true;
 	}
 	
@@ -159,10 +152,7 @@ public class Banker {
 			return false;
 		}
 		
-		if (!openBank())
-			return false;
-		
-		if (!isBankLoaded())
+		if (!openBank() || !isBankLoaded())
 			return false;
 		
 		if (handlerXML.setup_depositing) {
@@ -184,7 +174,6 @@ public class Banker {
 					}
 					
 					if (handlerXML.setup_depositing_noted) {
-
 						RSItem item = RS.Inventory_find(handlerXML.setup_depositing_exceptions.get(i));
 						if (item != null) {
 							RSItem item_noted = RS.Inventory_find(item.getDefinition().getNotedItemID());
@@ -203,8 +192,7 @@ public class Banker {
 						return true; // We already slept after depositing so lets not do it again.					
 			}
 			else {
-				Banking.depositAll();
-			
+				Banking.depositAll();		
 				if (jGeneral.waitInventory())
 					return true; // We already slept after depositing so lets not do it again.
 			}
@@ -221,10 +209,7 @@ public class Banker {
 			return false;
 		}
 		
-		if (!openBank())
-			return false;
-		
-		if (!isBankLoaded())
+		if (!openBank() || !isBankLoaded())
 			return false;
 		
 		Banking.depositAll();
@@ -238,10 +223,7 @@ public class Banker {
 	
 	public static boolean withdraw() {
 
-		if (!openBank())
-			return false;
-		
-		if (!isBankLoaded())
+		if (!openBank() || !isBankLoaded())
 			return false;
 
 		if (handlerXML.setup_withdrawing && handlerXML.setup_withdrawing_items.size() > 0 && handlerXML.setup_withdrawing_amount.size() > 0) {
@@ -297,10 +279,7 @@ public class Banker {
 	
 	public static boolean withdraw(int id, int amount) {
 		
-		if (!openBank())
-			return false;
-		
-		if (!isBankLoaded())
+		if (!openBank() || !isBankLoaded())
 			return false;
 
 		if (RS.Banking_find(id) == null) {
@@ -334,10 +313,7 @@ public class Banker {
 	
 	public static boolean withdraw(String name, int amount) {
 
-		if (!openBank())
-			return false;
-		
-		if (!isBankLoaded())
+		if (!openBank() || !isBankLoaded())
 			return false;
 
 		RSItem item = RS.Banking_find(name);
@@ -372,10 +348,7 @@ public class Banker {
 	
 	public static boolean withdraw_stackException() {
 		
-		if (!openBank())
-			return false;
-		
-		if (!isBankLoaded())
+		if (!openBank() || !isBankLoaded())
 			return false;
 
 		if (handlerXML.setup_withdrawing && handlerXML.setup_withdrawing_items.size() > 0 && handlerXML.setup_withdrawing_amount.size() > 0) {
@@ -427,10 +400,7 @@ public class Banker {
 	
 	public static boolean withdraw_stackException(int id, int amount) {
 	
-		if (!openBank())
-			return false;
-		
-		if (!isBankLoaded())
+		if (!openBank() || !isBankLoaded())
 			return false;
 
 		if (RS.Banking_find(id) == null) {
@@ -460,10 +430,7 @@ public class Banker {
 
 	public static boolean withdraw_stackException(String name, int amount) {
 		
-		if (!openBank())
-			return false;
-		
-		if (!isBankLoaded())
+		if (!openBank() || !isBankLoaded())
 			return false;
 
 		RSItem item = RS.Banking_find(name);
@@ -493,154 +460,146 @@ public class Banker {
 	}
 	
 	public static boolean walkToBank() {
-		if (handlerXML.walking_walktobank == true) {
-			if (!Banking.isInBank()) {
-				jGeneral.Count = 0;
-				if (Timing.waitCondition(() -> {
-					jGeneral.occurenceCounter();
-	            	General.sleep(50); // To save CPU power
-	            	return DaxWalker.walkToBank();
-	        	}, 300))
-					return true;
-				else
-					General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
-			}
-		}
-		else
+		if (handlerXML.walking_walktobank == true)
 			return true;
+			
+		if (!Banking.isInBank()) {
+			jGeneral.Count = 0;
+			if (Timing.waitCondition(() -> {
+				jGeneral.occurenceCounter();
+	            General.sleep(50); // To save CPU power
+	            return DaxWalker.walkToBank();
+	        }, 300))
+				return true;
+
+			General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
+		}
 
 		return false;
 	}
 	
 	public static boolean walkToBank(WalkingCondition condition) {
-		if (handlerXML.walking_walktobank == true) {
-			if (!Banking.isInBank()) {
-				jGeneral.Count = 0;
-				if (Timing.waitCondition(() -> {
-					jGeneral.occurenceCounter();
-					General.sleep(50); // To save CPU power
-					return DaxWalker.walkToBank(condition);
-				}, 300))
-					return true;
-				else
-					General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
-			}
-		}
-		else
+		if (handlerXML.walking_walktobank == true)
 			return true;
+			
+		if (!Banking.isInBank()) {
+			jGeneral.Count = 0;
+			if (Timing.waitCondition(() -> {
+				jGeneral.occurenceCounter();
+	            General.sleep(50); // To save CPU power
+	            return DaxWalker.walkToBank(condition);
+	        }, 300))
+				return true;
 
-		return false;		
+			General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
+		}
+
+		return false;	
 	}
 	
 	public static boolean walkToBank(RunescapeBank bank) {
-		if (handlerXML.walking_walktobank == true) {
-			if (bank != null) {
-				jGeneral.Count = 0;
-				if (Timing.waitCondition(() -> {
-					jGeneral.occurenceCounter();
-					General.sleep(50); // To save CPU power
-					return DaxWalker.walkToBank(bank);
-				}, 300))
-					return true;
-				else
-					General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
-			}
-		}
-		else
+		if (handlerXML.walking_walktobank == true)
 			return true;
+
+		if (bank != null) {
+			jGeneral.Count = 0;
+			if (Timing.waitCondition(() -> {
+				jGeneral.occurenceCounter();
+				General.sleep(50); // To save CPU power
+				return DaxWalker.walkToBank(bank);
+			}, 300))
+				return true;
+
+			General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
+		}
 		
 		if (!Banking.isInBank()) 
 			General.println("AutoBanker_Error - Could not generate path to bank.");
+
 		return false;
 	}
 	
 	public static boolean walkToBank(RunescapeBank bank, WalkingCondition condition) {
-		if (handlerXML.walking_walktobank == true) {
-			if (bank != null) {
-				jGeneral.Count = 0;
-				if (Timing.waitCondition(() -> {
-					jGeneral.occurenceCounter();
-					General.sleep(50); // To save CPU power
-					return DaxWalker.walkToBank(bank, condition);
-				}, 300))
-					return true;
-				else
-					General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
-			}
-		}
-		else
+		if (handlerXML.walking_walktobank == true)
 			return true;
+
+		if (bank != null) {
+			jGeneral.Count = 0;
+			if (Timing.waitCondition(() -> {
+				jGeneral.occurenceCounter();
+				General.sleep(50); // To save CPU power
+				return DaxWalker.walkToBank(bank, condition);
+			}, 300))
+				return true;
+
+			General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
+		}
 		
 		if (!Banking.isInBank()) 
 			General.println("AutoBanker_Error - Could not generate path to bank.");
+
 		return false;		
 	}
 
 	// Walks to specified bank if not set to null, otherwise walk to nearest bank.
 	public static boolean walkToBank_default(RunescapeBank bank) {
-		if (handlerXML.walking_walktobank == true) {
-			if (bank != null) {
-				jGeneral.Count = 0;
-				if (Timing.waitCondition(() -> {
-					jGeneral.occurenceCounter();
-					General.sleep(50); // To save CPU power
-					return DaxWalker.walkToBank(bank);
-				}, 300))
-					return true;
-				else
-					General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
-			}
-			else if (!Banking.isInBank()) {
-				jGeneral.Count = 0;
-				if (Timing.waitCondition(() -> {
-					jGeneral.occurenceCounter();
-					General.sleep(50); // To save CPU power
-					return DaxWalker.walkToBank();
-				}, 300))
-					return true;
-				else
-					General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
-			}
-		}
-		else
+		if (handlerXML.walking_walktobank == true)
 			return true;
 		
-		if ((!Banking.isInBank()))
+		if (bank != null) {
+			jGeneral.Count = 0;
+			if (Timing.waitCondition(() -> {
+				jGeneral.occurenceCounter();
+				General.sleep(50); // To save CPU power
+				return DaxWalker.walkToBank(bank);
+			}, 300))
+				return true;
+
+			General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
+		}
+		else if (!Banking.isInBank()) {
+			jGeneral.Count = 0;
+			if (Timing.waitCondition(() -> {
+				jGeneral.occurenceCounter();
+				General.sleep(50); // To save CPU power
+				return DaxWalker.walkToBank();
+			}, 300))
+				return true;
+
+			General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
 			General.println("AutoBanker_Error - Could not generate path to bank.");
+		}
 
 		return false;
 	}
 	
 	public static boolean walkToBank_default(RunescapeBank bank, WalkingCondition condition) {
-		if (handlerXML.walking_walktobank == true) {
-			if (bank != null) {
-				jGeneral.Count = 0;
-				if (Timing.waitCondition(() -> {
-					jGeneral.occurenceCounter();
-					General.sleep(50); // To save CPU power
-					return DaxWalker.walkToBank(bank, condition);
-				}, 300))
-					return true;
-				else
-					General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
-			}
-			else if (!Banking.isInBank()) {
-				jGeneral.Count = 0;
-				if (Timing.waitCondition(() -> {
-					jGeneral.occurenceCounter();
-					General.sleep(50); // To save CPU power
-					return DaxWalker.walkToBank(condition);
-				}, 300))
-					return true;
-				else
-					General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
-			}
-		}
-		else
+		if (handlerXML.walking_walktobank == true)
 			return true;
 		
-		if ((!Banking.isInBank()))
+		if (bank != null) {
+			jGeneral.Count = 0;
+			if (Timing.waitCondition(() -> {
+				jGeneral.occurenceCounter();
+				General.sleep(50); // To save CPU power
+				return DaxWalker.walkToBank(bank, condition);
+			}, 300))
+				return true;
+
+			General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
+		}
+		else if (!Banking.isInBank()) {
+			jGeneral.Count = 0;
+			if (Timing.waitCondition(() -> {
+				jGeneral.occurenceCounter();
+				General.sleep(50); // To save CPU power
+				return DaxWalker.walkToBank();
+			}, 300))
+				return true;
+
+			General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
 			General.println("AutoBanker_Error - Could not generate path to bank.");
+		}
 
 		return false;
 	}

@@ -20,15 +20,13 @@ public class jGeneral {
 	public static int getCash(boolean place) {
 		
 		RSItem item = null;
-		if (place)
-			if (Banker.openBank())
-				item = RS.Banking_find(995);
+		if (place && Banker.openBank())
+			item = RS.Banking_find(995);
 		else
 			item = RS.Inventory_find(995);
 		
-		if (item != null)
-			if (item.getStack() != 0)
-				return item.getStack();
+		if (item != null && item.getStack() != 0)
+			return item.getStack();
 
 		return 0;
 	}
@@ -75,15 +73,13 @@ public class jGeneral {
 
 	public static boolean clickAll(int delay_min, int delay_max) {
 		RSItem[] items = Inventory.find(handlerXML.setup_withdrawing_items.get(0));
-		if (items != null) {
-			if (deselect()) {
-				General.println(handlerXML.setup_withdrawing_items.get(0));
-				for (RSItem item : items) {
-					if (!item.click()) {
-						General.println("AutoGeneral_Error - Could not click the desired item.");
-						General.sleep(delay_min, delay_max);
-						return false;
-					}
+		if (items != null && deselect()) {
+			General.println(handlerXML.setup_withdrawing_items.get(0));
+			for (RSItem item : items) {
+				if (!item.click()) {
+					General.println("AutoGeneral_Error - Could not click the desired item.");
+					General.sleep(delay_min, delay_max);
+					return false;
 				}
 			}
 		}

@@ -10,9 +10,8 @@ public class RS {
 
 	public static RSItem getItem(RSItem[] items) {
 		for (RSItem item : items) {
-			if (item != null) {
+			if (item != null)
 				return item;
-			}
 		}
 		
 		return null;
@@ -22,9 +21,8 @@ public class RS {
 		RSItem[] items = Banking.find(ids);
 		
 		for (RSItem item : items) {
-			if (item != null) {
+			if (item != null)
 				return item;
-			}
 		}
 		
 		return null;
@@ -34,9 +32,8 @@ public class RS {
 		RSItem[] items = Banking.find(names);
 		
 		for (RSItem item : items) {
-			if (item != null) {
+			if (item != null)
 				return item;
-			}
 		}
 		
 		return null;
@@ -46,9 +43,8 @@ public class RS {
 		RSItem[] items = Inventory.find(ids);
 		
 		for (RSItem item : items) {
-			if (item != null) {
+			if (item != null)
 				return item;
-			}
 		}
 		
 		return null;
@@ -57,9 +53,10 @@ public class RS {
 	public static RSNPC NPCs_findNearest(String name) {
 		RSNPC[] npcs = NPCs.findNearest(name);
 		
-		for (RSNPC npc : npcs)
+		for (RSNPC npc : npcs) {
 			if (npc != null)
 				return npc;
+		}
 		
 		return null;
 	}

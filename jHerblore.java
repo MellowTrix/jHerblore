@@ -48,7 +48,7 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
 
     private File newFile = null;
     
-	private final FluffeesPaint FLUFFEES_PAINT = new FluffeesPaint(this, FluffeesPaint.PaintLocations.TOP_LEFT_CHATBOX, new Color[]{new Color(255, 251, 255)}, "Trebuchet MS", new Color[]{new Color(93, 156, 236, 189)},
+	private final FluffeesPaint FLUFFEES_PAINT = new FluffeesPaint(this, FluffeesPaint.PaintLocations.TOP_LEFT_CHATBOX, new Color[]{new Color(255, 251, 255)}, "Trebuchet MS", new Color[]{new Color(0, 100, 0, 189)},
             new Color[]{new Color(39, 95, 175)}, 1, false, 5, 3, 0);
 	
     @Override

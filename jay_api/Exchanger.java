@@ -34,11 +34,8 @@ public class Exchanger {
 	}
 	
 	public static boolean open() {
-		if (GrandExchange.getWindowState() == null) {
-			if (Banking.isBankScreenOpen())
-				if (!Banker.close())
-					return false;
-				
+		if (GrandExchange.getWindowState() == null && Banking.isBankScreenOpen() && Banker.close()) {
+			
 			RSNPC npc = RS.NPCs_findNearest("Grand Exchange Clerk");
 			if (npc != null) {
 				if(!jGeneral.deselect())
@@ -60,11 +57,8 @@ public class Exchanger {
 		return true;
 	}
 
-	public static boolean close() {
-		if (!jGeneral.deselect())
-			return false;
-			
-		if (GrandExchange.close()) {
+	public static boolean close() {		
+		if (jGeneral.deselect() && GrandExchange.close()) {
 			jGeneral.defaultDynamicSleep();
 			return true;
 		}
@@ -76,31 +70,20 @@ public class Exchanger {
 	public static boolean buy(int id, int price, int amount) {
 
 		int currCash = jGeneral.getCash(false);
-		if (currCash < price*amount)
-			if (!withdrawGP(price*amount - currCash))
-				return false;	
-		
-		if (!open())
-			return false;
-		
-		if (!jGeneral.deselect()) // In case GE was already open and we had a spell selected.
-			return false;
+		if ((currCash < price*amount && !withdrawGP(price*amount - currCash)) ||
+			!open() || !jGeneral.deselect()) // deselect() In case GE was already open and we had a spell selected.
+			return false;	
 		
 		String item = RSItemDefinition.get(id).getName();
-		if (item != null) {
-			if (Timing.waitCondition(() -> {
-				General.sleep(50);
-		        return GrandExchange.offer(item, price, amount, false);
-		    }, 2000)) {
-				jGeneral.defaultDynamicSleep();
-				return true;
-			}
+		if (item != null && Timing.waitCondition(() -> {
+			General.sleep(50);
+	        return GrandExchange.offer(item, price, amount, false);
+	    }, 2000)) {
+			jGeneral.defaultDynamicSleep();
+			return true;
+		}
 
-			General.println("AutoGE_Error - Failed to setup GE offer.");
-			return false;
-		}	
-
-		General.println("AutoGE_Error - Could not find item.");
+		General.println("AutoGE_Error - Failed to setup GE offer.");
 		return false;
 	}
 
@@ -109,34 +92,21 @@ public class Exchanger {
 	}
 	
 	public static boolean sell(int id, int price, int amount) {
-		
-		int currAmount = Inventory.getCount(id);
-		if (currAmount < amount) {
-			if (!Banker.withdraw(id, amount))
+
+		if ((Inventory.getCount(id) < amount && !Banker.withdraw(id, amount)) || 
+		    !open() || !jGeneral.deselect()) // deselect() In case GE was already open and we had a spell selected.
 				return false;
-		}
-		
-		if (!open())
-			return false;
-		
-		if (!jGeneral.deselect()) // In case GE was already open and we had a spell selected.
-			return false;
 		
 		String item = RSItemDefinition.get(id).getName();
-		if (item != null) {
-			if (Timing.waitCondition(() -> {
-				General.sleep(50);
-		        return GrandExchange.offer(item, price, amount, true);
-		    }, 2000)) {
-				jGeneral.defaultDynamicSleep();
-				return true;
-			}
+		if (item != null && Timing.waitCondition(() -> {
+			General.sleep(50);
+	        return GrandExchange.offer(item, price, amount, true);
+	    }, 2000)) {
+			jGeneral.defaultDynamicSleep();
+			return true;
+		}
 
-			General.println("AutoGE_Error - Failed to setup GE offer.");
-			return false;
-		}	
-
-		General.println("AutoGE_Error - Could not find item.");
+		General.println("AutoGE_Error - Failed to setup GE offer.");
 		return false;
 	}
 
@@ -146,30 +116,21 @@ public class Exchanger {
 	
 	public static boolean collectBuy(int id, int amount) {
 
-		if (open()) {
-
-			if (!jGeneral.deselect()) // In case GE was already open and we had a spell selected.
-				return false;
+		if (open() && jGeneral.deselect()) {
 
 			if (!Timing.waitCondition(() -> {
 				General.sleep(50);
 		        return clickOffer(id, amount, TYPE.BUY);
-		    }, 2000))
-				return false;
-
-			if (!getCompleted())
+		    }, 2000) || !getCompleted())
 				return false;
 
 			RSItem[] items = GrandExchange.getCollectItems();
-			if (items != null) {
-				if (GrandExchange.collectItems(COLLECT_METHOD.BANK, items)) {
-					jGeneral.defaultDynamicSleep();
-					return true;
-				}
+			if (items != null && GrandExchange.collectItems(COLLECT_METHOD.BANK, items)) {
+				jGeneral.defaultDynamicSleep();
+				return true;
 			}
 					
 			General.println("AutoGE_Error - Could not collect the items");
-			return false;
 		}
 
 		return false;
@@ -177,30 +138,21 @@ public class Exchanger {
 
 	public static boolean collectSell(int id, int amount) {
 
-		if (open()) {
-
-			if (!jGeneral.deselect()) // In case GE was already open and we had a spell selected.
-				return false;
+		if (open() && jGeneral.deselect()) {
 
 			if (!Timing.waitCondition(() -> {
 				General.sleep(50);
 		        return clickOffer(id, amount, TYPE.SELL);
-		    }, 2000))
-				return false;
-
-			if (!getCompleted())
+		    }, 2000) || !getCompleted())
 				return false;
 
 			RSItem[] items = GrandExchange.getCollectItems();
-			if (items != null) {
-				if (GrandExchange.collectItems(COLLECT_METHOD.BANK, items)) {
-					jGeneral.defaultDynamicSleep();
-					return true;
-				}
+			if (items != null && GrandExchange.collectItems(COLLECT_METHOD.BANK, items)) {
+				jGeneral.defaultDynamicSleep();
+				return true;
 			}
 					
 			General.println("AutoGE_Error - Could not collect the items");
-			return false;
 		}
 
 		return false;
@@ -208,13 +160,11 @@ public class Exchanger {
 	
 	public static boolean clickOffer(int id, int amount, TYPE type) {
 		for (RSGEOffer offer : GrandExchange.getOffers()) {
-			if (offer.getStatus() != STATUS.EMPTY) {
-				if (offer.getItemID() == id && offer.getQuantity() == amount && offer.getType() == type) {
-					if (offer.click()) {
-						jGeneral.defaultDynamicSleep();
-						return true;
-					}
-				}
+			if (offer.getStatus() != STATUS.EMPTY && offer.getItemID() == id
+			 && offer.getQuantity() == amount && offer.getType() == type
+			 && offer.click()) {
+				jGeneral.defaultDynamicSleep();
+				return true;
 			}		
 		}
 		

@@ -28,22 +28,29 @@ public class Walker extends jGeneral {
 	};
 	
 	public static boolean walkTo(Positionable positionable) {
+		jGeneral.Count = 0;
 		if (Timing.waitCondition(() -> {
+			jGeneral.occurenceCounter();
             General.sleep(50); // To save CPU power
             return DaxWalker.walkTo(positionable);
         }, 500))
 			return true;
-		else
-			General.println("Something went wrong.");
-	
+		
+		General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
 		General.println("AutoWalker_Error - Could not generate path to location.");
 		return false;
 	}
 	
 	public static boolean walkTo(Positionable positionable, WalkingCondition condition) {
-		if (DaxWalker.walkTo(positionable, condition))
+		jGeneral.Count = 0;
+		if (Timing.waitCondition(() -> {
+			jGeneral.occurenceCounter();
+            General.sleep(50); // To save CPU power
+            return DaxWalker.walkTo(positionable, condition);
+        }, 500))
 			return true;
 		
+		General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
 		General.println("AutoWalker_Error - Could not generate path to location.");
 		return false;
 	}
