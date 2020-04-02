@@ -165,7 +165,7 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     						General.println("AutoBanker_Error - Item not found in the bank.");
     						return;
     					}
-    					General.println(item.getID());
+
     					if (Exchanger.sell(item.getID(), GrandExchange.tryGetPrice(item.getID()).get(), item.getStack(), handlerXML.GE_mult_sell)) {
     						if (!Exchanger.collectSell(item.getID(), item.getStack()))
     							return;
@@ -189,5 +189,6 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
 	@Override
 	public void onEnd() {
 		General.println("Thank you for using jHerblore!");
+		jaysgui.endScript = false;
 	}
 }
