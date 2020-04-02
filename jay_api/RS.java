@@ -17,6 +17,15 @@ public class RS {
 		return null;
 	}
 	
+	public static RSItem getItem_specific(RSItem[] items, int id) {
+		for (RSItem item : items) {
+			if (item != null && item.getID() == id)
+				return item;
+		}
+		
+		return null;
+	}
+	
 	public static RSItem Banking_find(int... ids) {
 		RSItem[] items = Banking.find(ids);
 		

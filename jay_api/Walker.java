@@ -9,17 +9,23 @@ import org.tribot.api2007.Options;
 import scripts.dax_api.api_lib.DaxWalker;
 import scripts.dax_api.walker_engine.WalkingCondition;
 
-public class Walker extends jGeneral {
+public class Walker {
 	
-	public static int generatedRun = util.generateRunActivation();
+    private Walker() {}
+    private static final Walker WALKER = new Walker();
+    public static Walker get() {
+        return WALKER;
+    }
 	
-	public static WalkingCondition condition_enableRun = new WalkingCondition() {
+	private int generatedRun = jGeneral.get().getUtil().generateRunActivation();
+	
+	public WalkingCondition condition_enableRun = new WalkingCondition() {
 
 		@Override
 		public State action() {
 			if (!Game.isRunOn() && Game.getRunEnergy() >= generatedRun) {
 				Options.setRunEnabled(true);
-				generatedRun = util.generateRunActivation();
+				generatedRun = jGeneral.get().getUtil().generateRunActivation();
             	return State.CONTINUE_WALKER;
 			}
 
@@ -27,30 +33,30 @@ public class Walker extends jGeneral {
         }
 	};
 	
-	public static boolean walkTo(Positionable positionable) {
-		jGeneral.Count = 0;
+	public boolean walkTo(Positionable positionable) {
+		jGeneral.get().setCount(0);
 		if (Timing.waitCondition(() -> {
-			jGeneral.occurenceCounter();
+			jGeneral.get().occurenceCounter();
             General.sleep(50); // To save CPU power
             return DaxWalker.walkTo(positionable);
         }, 500))
 			return true;
 		
-		General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
+		General.println("AutoBanker_Error - Method call count: " + jGeneral.get().getCount());
 		General.println("AutoWalker_Error - Could not generate path to location.");
 		return false;
 	}
 	
-	public static boolean walkTo(Positionable positionable, WalkingCondition condition) {
-		jGeneral.Count = 0;
+	public boolean walkTo(Positionable positionable, WalkingCondition condition) {
+		jGeneral.get().setCount(0);
 		if (Timing.waitCondition(() -> {
-			jGeneral.occurenceCounter();
+			jGeneral.get().occurenceCounter();
             General.sleep(50); // To save CPU power
             return DaxWalker.walkTo(positionable, condition);
         }, 500))
 			return true;
 		
-		General.println("AutoBanker_Error - Method call count: " + jGeneral.Count);
+		General.println("AutoBanker_Error - Method call count: " + jGeneral.get().getCount());
 		General.println("AutoWalker_Error - Could not generate path to location.");
 		return false;
 	}

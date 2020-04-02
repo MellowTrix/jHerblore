@@ -108,11 +108,11 @@ public class jaysgui {
 		
 		JSpinner spinner = new JSpinner(new SpinnerNumberModel(0, -60, 100, 1)); // Lower limit is 60% incase item value is 1 GP we do not want to attempt to buy/sell it for 0 gp.
 		spinner.setEditor(new JSpinner.DefaultEditor(spinner));
-		spinner.setValue(Integer.parseInt(handlerXML.getSetting(file, "GE", "restocking_mult_buy")));
+		spinner.setValue(Integer.parseInt(handlerXML.get().getSetting(file, "GE", "restocking_mult_buy")));
 		
 		JSpinner spinner_1 = new JSpinner(new SpinnerNumberModel(0, -60, 100, 1));
 		spinner_1.setEditor(new JSpinner.DefaultEditor(spinner_1));
-		spinner_1.setValue(Integer.parseInt(handlerXML.getSetting(file, "GE", "restocking_mult_sell")));
+		spinner_1.setValue(Integer.parseInt(handlerXML.get().getSetting(file, "GE", "restocking_mult_sell")));
 		
 		JCheckBox skipCheckBox = new JCheckBox("Skip GUI?");
 		skipCheckBox.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -136,10 +136,10 @@ public class jaysgui {
 	    });
 	    
 		JCheckBox chckbxNewCheckBox = new JCheckBox("Enable restocking");
-		if (handlerXML.getSetting(file, "GE", "restocking").equals("true")) {
+		if (handlerXML.get().getSetting(file, "GE", "restocking").equals("true")) {
 			chckbxNewCheckBox.setSelected(true);
 			frmtdtxtfldRestockingAmount.setEditable(true);
-			frmtdtxtfldRestockingAmount.setText(handlerXML.getSetting(file, "GE", "restocking_amount"));
+			frmtdtxtfldRestockingAmount.setText(handlerXML.get().getSetting(file, "GE", "restocking_amount"));
 			spinner.setEnabled(true);
 			spinner_1.setEnabled(true);
 		}
@@ -171,7 +171,7 @@ public class jaysgui {
 		startButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				if (skipCheckBox.isSelected())		
-					handlerXML.skipGUI(file, true);
+					handlerXML.get().skipGUI(file, true);
 				
 				settings[5] = herbs[comboBoxModel.getIndexOf(comboBoxModel.getSelectedItem())];
 				if (chckbxNewCheckBox.isSelected() && !frmtdtxtfldRestockingAmount.getText().equals("") && !frmtdtxtfldRestockingAmount.getText().startsWith("0")) {
@@ -186,10 +186,10 @@ public class jaysgui {
 				settings[11] = spinner.getValue().toString();
 				settings[12] = spinner_1.getValue().toString();
 				
-                handlerXML.parseHerblore(file, settings, herblore_settings);
+                handlerXML.get().parseHerblore(file, settings, herblore_settings);
 					
 				frame.dispose();
-				handlerXML.START_TIME = System.currentTimeMillis();
+				handlerXML.get().setTime(System.currentTimeMillis());
 				startScript = true;			
 			}
 		});
@@ -312,10 +312,10 @@ public class jaysgui {
 			    chooser.setFileFilter(filter);
 			    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
 			    	setComboBoxModel(chooser.getSelectedFile(), comboBoxModel, herbs);
-			    	skipCheckBox.setSelected(handlerXML.skipGUI(chooser.getSelectedFile()));
-			    	if (handlerXML.getSetting(chooser.getSelectedFile(), "GE", "restocking").equals("true")) {
+			    	skipCheckBox.setSelected(handlerXML.get().skipGUI(chooser.getSelectedFile()));
+			    	if (handlerXML.get().getSetting(chooser.getSelectedFile(), "GE", "restocking").equals("true")) {
 			    		frmtdtxtfldRestockingAmount.setEditable(true);
-			    		frmtdtxtfldRestockingAmount.setText(handlerXML.getSetting(chooser.getSelectedFile(), "GE", "restocking_amount"));
+			    		frmtdtxtfldRestockingAmount.setText(handlerXML.get().getSetting(chooser.getSelectedFile(), "GE", "restocking_amount"));
 			    		chckbxNewCheckBox.setSelected(true);
 			    	}
 			    	else {
@@ -323,8 +323,8 @@ public class jaysgui {
 			    		frmtdtxtfldRestockingAmount.setText("");
 			    		chckbxNewCheckBox.setSelected(false);
 			    	}
-			    	spinner.setValue(Integer.parseInt(handlerXML.getSetting(chooser.getSelectedFile(), "GE", "restocking_mult_buy")));
-			    	spinner_1.setValue(Integer.parseInt(handlerXML.getSetting(chooser.getSelectedFile(), "GE", "restocking_mult_sell")));
+			    	spinner.setValue(Integer.parseInt(handlerXML.get().getSetting(chooser.getSelectedFile(), "GE", "restocking_mult_buy")));
+			    	spinner_1.setValue(Integer.parseInt(handlerXML.get().getSetting(chooser.getSelectedFile(), "GE", "restocking_mult_sell")));
 			    }
 			}
 		});
@@ -358,20 +358,20 @@ public class jaysgui {
 			    	if (!FilenameUtils.isExtension(saved_file, "xml")) {
 			    		saved_file = FilenameUtils.removeExtension(saved_file);
 			    		File xml_file = new File(saved_file + ".xml");
-			    		handlerXML.createFile(xml_file);
+			    		handlerXML.get().createFile(xml_file);
 						if (skipCheckBox.isSelected())
-							handlerXML.skipGUI(xml_file, true);
+							handlerXML.get().skipGUI(xml_file, true);
 						else
-							handlerXML.skipGUI(xml_file, false);
-						handlerXML.parseHerblore(xml_file, settings, herblore_settings);
+							handlerXML.get().skipGUI(xml_file, false);
+						handlerXML.get().parseHerblore(xml_file, settings, herblore_settings);
 					}
 			    	else {
-			    		handlerXML.createFile(chooser.getSelectedFile());
-			    		handlerXML.parseHerblore(chooser.getSelectedFile(), settings, herblore_settings);
+			    		handlerXML.get().createFile(chooser.getSelectedFile());
+			    		handlerXML.get().parseHerblore(chooser.getSelectedFile(), settings, herblore_settings);
 						if (skipCheckBox.isSelected())
-							handlerXML.skipGUI(chooser.getSelectedFile(), true);
+							handlerXML.get().skipGUI(chooser.getSelectedFile(), true);
 						else
-							handlerXML.skipGUI(chooser.getSelectedFile(), false);
+							handlerXML.get().skipGUI(chooser.getSelectedFile(), false);
 			    	}
 			    }
 			}
@@ -382,7 +382,7 @@ public class jaysgui {
 	
 	@SuppressWarnings("rawtypes")
 	public void setComboBoxModel(File file, DefaultComboBoxModel comboBoxModel, String[] array) {
-		String s = handlerXML.getSetting(file, "SETUP", "setup_withdrawing_items");
+		String s = handlerXML.get().getSetting(file, "SETUP", "setup_withdrawing_items");
 		for (int i=0; i < array.length; i++) {
 			if (array[i].equals(s))
 				comboBoxModel.setSelectedItem(comboBoxModel.getElementAt(i));

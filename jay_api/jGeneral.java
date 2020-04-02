@@ -12,16 +12,40 @@ import org.tribot.api2007.types.RSItem;
 
 public class jGeneral {
 	
-	public static int Count = 0;
+    private jGeneral() {}
+    private static final jGeneral GENERAL = new jGeneral();
+    public static jGeneral get() {
+        return GENERAL;
+    }
 	
-	public static final ABCUtil util = new ABCUtil();
+	private int Count = 0;
+	
+	private final ABCUtil util = new ABCUtil();
+	
+	public ABCUtil getUtil() {
+		return util;
+	}
+	
+	public int getCount() {
+		return Count;
+	}
+	
+	public void setCount(int val) {
+		Count = val;	
+	}
+	
+	public void occurenceCounter() {
+		Count++;
+	}
 	
 	// If true, checks the amount of cash in the bank. If false, checks the amount of cash in the inventory.
-	public static int getCash(boolean place) {
+	public int getCash(boolean place) {
 		
 		RSItem item = null;
-		if (place && Banker.openBank())
-			item = RS.Banking_find(995);
+		if (place) {
+			if (Banker.openBank())
+				item = RS.Banking_find(995);
+		}
 		else
 			item = RS.Inventory_find(995);
 		
@@ -31,27 +55,29 @@ public class jGeneral {
 		return 0;
 	}
 	
-	public static boolean waitInventory(int length) {
+	public boolean waitInventory(int val) {
 		if (Timing.waitCondition(() -> {
 			General.sleep(300, 600);
-			return Inventory.getAll().length != length;
-		}, General.random(3000, 5000)))
+			return Inventory.getAll().length != val;
+		}, General.random(3000, 5000))) {
 			return true; // We already slept after depositing so lets not do it again.
+		}
 
 		return false;
 	}
 	
-	public static boolean waitInventory() {
+	public boolean waitInventory() {
 		if (Timing.waitCondition(() -> {
 			General.sleep(300, 600);
 			return Inventory.getAll().length == 0;
-		}, General.random(3000, 5000)))
+		}, General.random(3000, 5000))) {
 			return true; // We already slept after depositing so lets not do it again.
+		}
 
 		return false;
 	}
 	
-	public static boolean deselect() {
+	public boolean deselect() {
 
 		if (Game.getItemSelectionState() != 0 || Magic.isSpellSelected()) {
 		    if (Timing.waitCondition(() -> {
@@ -71,23 +97,25 @@ public class jGeneral {
 		return true;
 	}
 
-	public static boolean clickAll(int delay_min, int delay_max) {
-		RSItem[] items = Inventory.find(handlerXML.setup_withdrawing_items.get(0));
+	public boolean clickAll(int delay_min, int delay_max) {
+		RSItem[] items = Inventory.find(handlerXML.get().getWithdrawingItems().get(0));
 		if (items != null && deselect()) {
-			General.println(handlerXML.setup_withdrawing_items.get(0));
 			for (RSItem item : items) {
 				if (!item.click()) {
 					General.println("AutoGeneral_Error - Could not click the desired item.");
-					General.sleep(delay_min, delay_max);
 					return false;
 				}
+
+				General.sleep(delay_min, delay_max);
 			}
+			
+			return true;
 		}
 		
-		return true;
+		return false;
 	}
 	
-	public static void superDynamicSleeper(int min_often, int max_often, int min_seldom, int max_seldom, int min_occurence, int max_occurence, boolean shift)
+	public void superDynamicSleeper(int min_often, int max_often, int min_seldom, int max_seldom, int min_occurence, int max_occurence, boolean shift)
 	{
 		if (min_often >= max_often || min_often>= min_seldom || max_often >= max_seldom ||
 			min_seldom >= max_seldom || min_occurence >= max_occurence || min_occurence == 0)
@@ -125,27 +153,23 @@ public class jGeneral {
 			General.sleep(min_seldom, max_seldom);
 	}
 
-	public static void superDynamicSleeper(int min_often, int max_often, int min_seldom, int max_seldom, int min_occurence, int max_occurence)
+	public void superDynamicSleeper(int min_often, int max_often, int min_seldom, int max_seldom, int min_occurence, int max_occurence)
 	{
 		superDynamicSleeper(min_often,  max_often, min_seldom, max_seldom, min_occurence, max_occurence, false);
 	}
 	
-	public static void defaultDynamicSleep()
+	public void defaultDynamicSleep()
 	{
 		if (General.randomBoolean())
-			jGeneral.superDynamicSleeper(330, 570, 1320, 2280, 6, 13, true);
+			superDynamicSleeper(330, 570, 1320, 2280, 6, 13, true);
 		else
-			jGeneral.superDynamicSleeper(330, 570, 660, 1140, 3, 5, true);
+			superDynamicSleeper(330, 570, 660, 1140, 3, 5, true);
 	}
 	
-	public static void shortDynamicSleep() {
+	public void shortDynamicSleep() {
 		if (General.randomBoolean())
-			jGeneral.superDynamicSleeper(130, 270, 520, 1080, 6, 13, true);
+			superDynamicSleeper(130, 270, 520, 1080, 6, 13, true);
 		else
-			jGeneral.superDynamicSleeper(130, 270, 260, 540, 3, 5, true);
-	}
-
-	public static void occurenceCounter() {
-		Count++;
+			superDynamicSleeper(130, 270, 260, 540, 3, 5, true);
 	}
 }

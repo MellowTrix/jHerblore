@@ -26,22 +26,95 @@ import scripts.dax_api.api_lib.models.RunescapeBank;
 
 public class handlerXML {
 
-	public static boolean setup_depositing = false;
-	public static boolean setup_depositing_equipment = false;
-	public static boolean setup_depositing_noted = false;
-	public static boolean setup_withdrawing = false;
-	public static boolean walking_walktobank = false;
-	public static boolean GE_restocking = false;
-	public static List<Integer> setup_withdrawing_items = new ArrayList<Integer>();
-	public static List<Integer> setup_withdrawing_amount = new ArrayList<Integer>();
-	public static List<Integer> setup_depositing_exceptions = new ArrayList<Integer>();
-	public static int GE_restocking_amount = 0;
-	public static float GE_mult_buy = 1.0f, GE_mult_sell = 1.0f;
-	public static RunescapeBank bank = null;
+    private handlerXML() {}
+    private static final handlerXML HANDLER = new handlerXML();
+    public static handlerXML get() {
+        return HANDLER;
+    }
+    
+    private boolean setup_depositing = false;
+	private boolean setup_depositing_equipment = false;
+	private boolean setup_depositing_noted = false;
+	private boolean setup_withdrawing = false;
+	private boolean walking_walktobank = false;
+	private boolean GE_restocking = false;
 	
-	public static long START_TIME = System.currentTimeMillis();
+	private int GE_restocking_amount = 0;
+	private float GE_mult_buy = 1.0f, GE_mult_sell = 1.0f;
+
+	private RunescapeBank bank = null;
 	
-	public static void createFile(File file) {
+	private List<Integer> setup_withdrawing_items = new ArrayList<Integer>();
+	private List<Integer> setup_withdrawing_amount = new ArrayList<Integer>();
+	private List<Integer> setup_depositing_exceptions = new ArrayList<Integer>();
+	
+	private long START_TIME = System.currentTimeMillis();
+	
+    public boolean isDepositing() {
+        return setup_depositing;
+    }
+	
+    public boolean isDepositingEquipment() {
+        return setup_depositing_equipment;
+    }
+    
+    public boolean isDepositingNoted() {
+    	return setup_depositing_noted;
+    }
+    
+    public boolean isWithdrawing () {
+    	return setup_withdrawing;
+    }
+    
+    public boolean isWalkingToBank() {
+    	return walking_walktobank;
+    }
+    
+    public boolean isRestocking() {
+    	return GE_restocking;
+    }
+ 
+    public int getRestockingAmount() {
+    	return GE_restocking_amount;
+    }
+    
+    public void setRestockingAmount(int val) {
+    	GE_restocking_amount = val;
+    }
+    
+    public float getGE_mult_buy() {
+    	return GE_mult_buy;
+    }
+    
+    public float getGE_mult_sell() {
+    	return GE_mult_sell;
+    }
+    
+    public RunescapeBank getBank() {
+    	return bank;
+    }
+    
+    public List<Integer> getWithdrawingItems() {
+    	return setup_withdrawing_items;
+    }
+    
+    public List<Integer> getWithdrawingAmount() {
+    	return setup_withdrawing_amount;
+    }
+    
+    public List<Integer> getDepositingExceptions() {
+    	return setup_depositing_exceptions;
+    }
+    
+    public long getTime() {
+    	return START_TIME;
+    }
+    
+    public void setTime(long time) {
+    	START_TIME = time;
+    }
+    
+    public void createFile(File file) {
 		
 		if (file == null) {
 			General.println("XMLhandler - Invalid file.");
@@ -143,7 +216,7 @@ public class handlerXML {
 		}
 	}
 
-	public static void saveFile(File file, Document doc) {
+	public void saveFile(File file, Document doc) {
 
 		if (file == null) {
 			General.println("XMLhandler - Invalid file.");
@@ -164,7 +237,7 @@ public class handlerXML {
 		}
 	}
 	
-	public static void parseFile(File file, String[] arr, Document doc) {
+	public void parseFile(File file, String[] arr, Document doc) {
 
 		if (file == null) {
 			General.println("XMLhandler - Invalid file.");
@@ -199,7 +272,7 @@ public class handlerXML {
 		loadSettings(file);
 	}
 
-	public static void parseHerblore(File file, String[] arr, String[] herb) {
+	public void parseHerblore(File file, String[] arr, String[] herb) {
 
 		if (file == null) {
 			General.println("XMLhandler - Invalid file.");
@@ -233,7 +306,7 @@ public class handlerXML {
 		parseFile(file, arr, doc);
 	}
 	
-	public static void loadSettings(File file) {
+	public void loadSettings(File file) {
 
 		if (file == null) {
 			General.println("XMLhandler - Invalid file.");
@@ -271,7 +344,7 @@ public class handlerXML {
 		}
 
 		if (eElement.getElementsByTagName("setup_depositing_equipment").item(0).getTextContent().equals("true"))
-				setup_depositing_equipment = true;
+			setup_depositing_equipment = true;
 
 		if (eElement.getElementsByTagName("setup_withdrawing").item(0).getTextContent().equals("true")) {
 			setup_withdrawing = true;
@@ -280,8 +353,8 @@ public class handlerXML {
 			if (!c.equals("-1") && !f.equals("-1")) {	
 				List<String> list = Arrays.asList(c.split(","));
 				List<String> list1 = Arrays.asList(f.split(","));
-				setup_withdrawing_items = list.stream().map(s -> Integer.parseInt(s)).collect(Collectors.toList());
-				setup_withdrawing_amount = list1.stream().map(s -> Integer.parseInt(s)).collect(Collectors.toList());
+				this.setup_withdrawing_items = list.stream().map(s -> Integer.parseInt(s)).collect(Collectors.toList());
+				this.setup_withdrawing_amount = list1.stream().map(s -> Integer.parseInt(s)).collect(Collectors.toList());
 			}
 		}
 		
@@ -314,7 +387,7 @@ public class handlerXML {
 		}
 	}
 	
-	public static String getSetting(File file, String parent, String setting) {
+	public String getSetting(File file, String parent, String setting) {
 		
 		if (file == null) {
 			General.println("XMLhandler - Invalid file.");
@@ -342,7 +415,7 @@ public class handlerXML {
 		return eElement.getElementsByTagName(setting).item(0).getTextContent();
 	}
 	
-	public static boolean skipGUI(File file) {
+	public boolean skipGUI(File file) {
 		if (file == null) {
 			General.println("XMLhandler - Invalid file.");
 			return false;
@@ -369,7 +442,7 @@ public class handlerXML {
 		return false;
 	}
 	
-	public static void skipGUI(File file, boolean bool) {
+	public void skipGUI(File file, boolean bool) {
 		if (file == null) {
 			General.println("XMLhandler - Invalid file.");
 			return;

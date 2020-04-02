@@ -18,14 +18,15 @@ public class Exchanger {
 	
 	public static boolean withdrawGP(int amount) {
 
-		if (GrandExchange.getWindowState() != null)
+		if (GrandExchange.getWindowState() != null) {
 			if (!close())
 				return false;
+		}
 		else if (!Banker.openBank())
 			return false;
 
 		if (Banker.withdraw(995, amount)) {
-			jGeneral.defaultDynamicSleep();
+			jGeneral.get().defaultDynamicSleep();
 			return true;
 		}
 		
@@ -38,11 +39,11 @@ public class Exchanger {
 			
 			RSNPC npc = RS.NPCs_findNearest("Grand Exchange Clerk");
 			if (npc != null) {
-				if(!jGeneral.deselect())
+				if(!jGeneral.get().deselect())
 					return false;
 				
 				if (DynamicClicking.clickRSNPC(npc, "Exchange Grand Exchange Clerk")) {
-					jGeneral.defaultDynamicSleep();
+					jGeneral.get().defaultDynamicSleep();
 					return true;
 				}
 
@@ -58,8 +59,8 @@ public class Exchanger {
 	}
 
 	public static boolean close() {		
-		if (jGeneral.deselect() && GrandExchange.close()) {
-			jGeneral.defaultDynamicSleep();
+		if (jGeneral.get().deselect() && GrandExchange.close()) {
+			jGeneral.get().defaultDynamicSleep();
 			return true;
 		}
 		
@@ -69,9 +70,9 @@ public class Exchanger {
 
 	public static boolean buy(int id, int price, int amount) {
 
-		int currCash = jGeneral.getCash(false);
+		int currCash = jGeneral.get().getCash(false);
 		if ((currCash < price*amount && !withdrawGP(price*amount - currCash)) ||
-			!open() || !jGeneral.deselect()) // deselect() In case GE was already open and we had a spell selected.
+			!open() || !jGeneral.get().deselect()) // deselect() In case GE was already open and we had a spell selected.
 			return false;	
 		
 		String item = RSItemDefinition.get(id).getName();
@@ -79,7 +80,7 @@ public class Exchanger {
 			General.sleep(50);
 	        return GrandExchange.offer(item, price, amount, false);
 	    }, 2000)) {
-			jGeneral.defaultDynamicSleep();
+			jGeneral.get().defaultDynamicSleep();
 			return true;
 		}
 
@@ -103,8 +104,8 @@ public class Exchanger {
 			return false;
 		}
 
-		if ((Inventory.getCount(id) < amount && !Banker.withdraw(250, amount)) || 
-		    !open() || !jGeneral.deselect()) // deselect() In case GE was already open and we had a spell selected.
+		if ((Inventory.getCount(id) < amount && !Banker.withdraw(id, amount)) || 
+		    !open() || !jGeneral.get().deselect()) // deselect() In case GE was already open and we had a spell selected.
 				return false;
 
 		String item = RSItemDefinition.get(id).getName();
@@ -112,7 +113,7 @@ public class Exchanger {
 			General.sleep(50);
 	        return GrandExchange.offer(item, price, amount, true);
 	    }, 2000)) {
-			jGeneral.defaultDynamicSleep();
+			jGeneral.get().defaultDynamicSleep();
 			return true;
 		}
 
@@ -126,7 +127,7 @@ public class Exchanger {
 	
 	public static boolean collectBuy(int id, int amount) {
 
-		if (open() && jGeneral.deselect()) {
+		if (open() && jGeneral.get().deselect()) {
 
 			if (!Timing.waitCondition(() -> {
 				General.sleep(50);
@@ -134,9 +135,12 @@ public class Exchanger {
 		    }, 2000) || !getCompleted())
 				return false;
 
-			RSItem[] items = GrandExchange.getCollectItems();
+			RSItem[] items = GrandExchange.getCollectItems();			
 			if (items != null && GrandExchange.collectItems(COLLECT_METHOD.BANK, items)) {
-				jGeneral.defaultDynamicSleep();
+				if (RS.getItem_specific(items, 995) != null)
+					jGeneral.get().waitInventory(Inventory.getAll().length);
+					
+				jGeneral.get().defaultDynamicSleep();
 				return true;
 			}
 					
@@ -148,7 +152,7 @@ public class Exchanger {
 
 	public static boolean collectSell(int id, int amount) {
 
-		if (open() && jGeneral.deselect()) {
+		if (open() && jGeneral.get().deselect()) {
 
 			if (!Timing.waitCondition(() -> {
 				General.sleep(50);
@@ -158,7 +162,10 @@ public class Exchanger {
 
 			RSItem[] items = GrandExchange.getCollectItems();
 			if (items != null && GrandExchange.collectItems(COLLECT_METHOD.BANK, items)) {
-				jGeneral.defaultDynamicSleep();
+				if (RS.getItem_specific(items, 995) != null)
+					jGeneral.get().waitInventory(Inventory.getAll().length);
+				
+				jGeneral.get().defaultDynamicSleep();
 				return true;
 			}
 					
@@ -173,7 +180,7 @@ public class Exchanger {
 			if (offer.getStatus() != STATUS.EMPTY && offer.getItemID() == id
 			 && offer.getQuantity() == amount && offer.getType() == type
 			 && offer.click()) {
-				jGeneral.defaultDynamicSleep();
+				jGeneral.get().defaultDynamicSleep();
 				return true;
 			}		
 		}

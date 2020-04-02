@@ -53,7 +53,7 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
 	
     @Override
     public String[] getPaintInfo() {
-        return new String[]{"jHerlbore v" + String.format("%.2f", getClass().getAnnotation(ScriptManifest.class).version()), "Time ran: " + FLUFFEES_PAINT.getRuntimeString(handlerXML.START_TIME),
+        return new String[]{"jHerlbore v" + String.format("%.2f", getClass().getAnnotation(ScriptManifest.class).version()), "Time ran: " + FLUFFEES_PAINT.getRuntimeString(handlerXML.get().getTime()),
         					SkillsHelper.getPrettySkillName(SkillsHelper.getSkillWithMostIncrease(SKILLS.HERBLORE)) + " XP (P/H): " + SkillsHelper.getReceivedXP(SkillsHelper.getSkillWithMostIncrease(SKILLS.HERBLORE)) +
         					" (" + SkillsHelper.getAmountPerHour(SkillsHelper.getReceivedXP(SkillsHelper.getSkillWithMostIncrease(SKILLS.HERBLORE)), this.getRunningTime()) + ")"};
     }
@@ -74,9 +74,9 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
         });
         
         // Create our settings file
-        handlerXML.createFile(newFile);
+        handlerXML.get().createFile(newFile);
         
-        if (!handlerXML.skipGUI(newFile))
+        if (!handlerXML.get().skipGUI(newFile))
         {
         	jaysgui.main(newFile);
     	
@@ -84,7 +84,7 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     			General.sleep(150);
         }
         else
-        	handlerXML.loadSettings(newFile);
+        	handlerXML.get().loadSettings(newFile);
     }
 	
     @Override
@@ -102,9 +102,9 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
         Matcher m = p.matcher(input);
         if (m.find()) {	
         	if (m.group(0).contains("true"))
-        		handlerXML.skipGUI(newFile, true);
+        		handlerXML.get().skipGUI(newFile, true);
         	else
-        		handlerXML.skipGUI(newFile, false);
+        		handlerXML.get().skipGUI(newFile, false);
         }
     }
     
@@ -118,20 +118,22 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     	
     	SkillsHelper.setStartSkills();
     	
+    	if (handlerXML.get().getRestockingAmount() < 28)
+    		handlerXML.get().setRestockingAmount(28);
+    	
     	while(true) {
     		try {
-    			Banker.walkToBank(Walker.condition_enableRun);
-    			Banker.depositItemsAll();			
-    			if (Banker.withdraw_stackException(handlerXML.setup_withdrawing_items.get(0), 28)) {
+    			Banker.walkToBank(Walker.get().condition_enableRun);
+    			Banker.depositItemsAll();
+    			if (Banker.withdraw_stackException(handlerXML.get().getWithdrawingItems().get(0), 28)) {
     				if (Banker.close()) {
-    					if (!jGeneral.clickAll(0, 20))
+    					if (!jGeneral.get().clickAll(0, 25))
     						return;
     				}
     				else
     					return;
     			}
-    			else if (handlerXML.GE_restocking) {
-
+    			else if (handlerXML.get().isRestocking()) {
     				if (Player.getPosition().distanceTo(new RSTile(3165, 3487, 0)) > 7) {			
     					if (Player.getPosition().distanceTo(new RSTile(3165, 3487, 0)) > 60) { // If we are a bit further away from GE then check the bank for RoW, will speed up the traveling.
     						if (!Banker.withdraw("Ring of wealth (1)", 1)) {
@@ -145,15 +147,17 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     						}
     					}
     					
-    					if (!Banker.walkToBank(RunescapeBank.GRAND_EXCHANGE, Walker.condition_enableRun))
+    					if (!Banker.walkToBank(RunescapeBank.GRAND_EXCHANGE, Walker.get().condition_enableRun))
     						return;
     				}
-    				if (Exchanger.buy(handlerXML.setup_withdrawing_items.get(0), GrandExchange.tryGetPrice(handlerXML.setup_withdrawing_items.get(0)).get(), handlerXML.GE_restocking_amount, handlerXML.GE_mult_buy)) {
-    					if (!Exchanger.collectBuy(handlerXML.setup_withdrawing_items.get(0), handlerXML.GE_restocking_amount))
+    				if (Exchanger.buy(handlerXML.get().getWithdrawingItems().get(0), GrandExchange.tryGetPrice(handlerXML.get().getWithdrawingItems().get(0)).get(), handlerXML.get().getRestockingAmount(), handlerXML.get().getGE_mult_buy())) {
+    					if (!Exchanger.collectBuy(handlerXML.get().getWithdrawingItems().get(0), handlerXML.get().getRestockingAmount()))
     						return;
     				}
-    				else if ((jGeneral.getCash(true) + jGeneral.getCash(false)) < (GrandExchange.tryGetPrice(handlerXML.setup_withdrawing_items.get(0)).get() * handlerXML.GE_restocking_amount)) {
-    					String item_name = RSItemDefinition.get(handlerXML.setup_withdrawing_items.get(0)).getName().substring(6);
+    				else if ((jGeneral.get().getCash(true) + jGeneral.get().getCash(false)) < (GrandExchange.tryGetPrice(handlerXML.get().getWithdrawingItems().get(0)).get()
+    						* handlerXML.get().getRestockingAmount() * handlerXML.get().getGE_mult_buy())) {
+
+    					String item_name = RSItemDefinition.get(handlerXML.get().getWithdrawingItems().get(0)).getName().substring(6);
     					RSItem item = RS.Banking_find(item_name.substring(0, 1).toUpperCase() + item_name.substring(1)); // Removing "Grimy" part of the string to fetch the clean version.
     					if (item != null) {
     						if (item.getStack() == 0) {
@@ -166,7 +170,7 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     						return;
     					}
 
-    					if (Exchanger.sell(item.getID(), GrandExchange.tryGetPrice(item.getID()).get(), item.getStack(), handlerXML.GE_mult_sell)) {
+    					if (Exchanger.sell(item.getID(), GrandExchange.tryGetPrice(item.getID()).get(), item.getStack(), handlerXML.get().getGE_mult_sell())) {
     						if (!Exchanger.collectSell(item.getID(), item.getStack()))
     							return;
     					}
@@ -177,7 +181,7 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     					return;
     			}
     			else
-    				return;		
+    				return;
     			
     		} catch(Exception e) {
     			e.printStackTrace();
