@@ -11,6 +11,9 @@ import org.tribot.api2007.types.RSGEOffer;
 import org.tribot.api2007.types.RSItem;
 import org.tribot.api2007.types.RSItemDefinition;
 import org.tribot.api2007.types.RSNPC;
+
+import scripts.jay_api.fluffeespaint.Variables;
+
 import org.tribot.api2007.types.RSGEOffer.STATUS;
 import org.tribot.api2007.types.RSGEOffer.TYPE;
 
@@ -124,6 +127,10 @@ public class Exchanger {
 	public static boolean sell(int id, int price, int amount, float multiplier) {
 		return sell(id, (int) (price*multiplier), amount);
 	}
+	/*
+	RSItem gold = RS.getItem_specific(items, 995);
+	if (gold != null) {
+		gold.getStack()*/
 	
 	public static boolean collectBuy(int id, int amount) {
 
@@ -149,7 +156,64 @@ public class Exchanger {
 
 		return false;
 	}
+	
+	// If we want to subtract profit.
+	public static boolean collectBuy_removeProfit(int id, int amount) {
 
+		if (open() && jGeneral.get().deselect()) {
+
+			if (!Timing.waitCondition(() -> {
+				General.sleep(50);
+		        return clickOffer(id, amount, TYPE.BUY);
+		    }, 2000) || !getCompleted())
+				return false;
+
+			RSItem[] items = GrandExchange.getCollectItems();			
+			if (items != null && GrandExchange.collectItems(COLLECT_METHOD.BANK, items)) {
+				RSItem gold = RS.getItem_specific(items, 995);
+				if (gold != null) {
+					Variables.get().removeFromProfit(id, amount, handlerXML.get().getGE_mult_buy(), gold.getStack());
+					jGeneral.get().waitInventory(Inventory.getAll().length);
+				}
+					
+				jGeneral.get().defaultDynamicSleep();
+				return true;
+			}
+					
+			General.println("AutoGE_Error - Could not collect the items");
+		}
+
+		return false;
+	}
+
+	public static boolean collectSell_addProfit(int id, int amount) {
+
+		if (open() && jGeneral.get().deselect()) {
+
+			if (!Timing.waitCondition(() -> {
+				General.sleep(50);
+		        return clickOffer(id, amount, TYPE.SELL);
+		    }, 2000) || !getCompleted())
+				return false;
+
+			RSItem[] items = GrandExchange.getCollectItems();
+			if (items != null && GrandExchange.collectItems(COLLECT_METHOD.BANK, items)) {
+				RSItem gold = RS.getItem_specific(items, 995);
+				if (gold != null) {
+					Variables.get().addToProfit(gold.getStack());
+					jGeneral.get().waitInventory(Inventory.getAll().length);
+				}
+				
+				jGeneral.get().defaultDynamicSleep();
+				return true;
+			}
+					
+			General.println("AutoGE_Error - Could not collect the items");
+		}
+
+		return false;
+	}
+	
 	public static boolean collectSell(int id, int amount) {
 
 		if (open() && jGeneral.get().deselect()) {

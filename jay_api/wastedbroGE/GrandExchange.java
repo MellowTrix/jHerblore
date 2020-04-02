@@ -13,8 +13,8 @@ import java.util.Optional;
 public class GrandExchange extends org.tribot.api2007.GrandExchange
 {
     private static IRsItemPriceService priceService = new RsItemPriceService.Builder()
-    		.addPriceService(new GrandExchangePriceService())
-            //.addPriceService(new RsBuddyPriceService())
+    		.addPriceService(new RsBuddyPriceService())
+    		//.addPriceService(new GrandExchangePriceService())
             .build();
 
     /**

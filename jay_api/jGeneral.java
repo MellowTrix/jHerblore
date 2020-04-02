@@ -10,6 +10,8 @@ import org.tribot.api2007.Inventory;
 import org.tribot.api2007.Magic;
 import org.tribot.api2007.types.RSItem;
 
+import scripts.jay_api.fluffeespaint.Variables;
+
 public class jGeneral {
 	
     private jGeneral() {}
@@ -97,13 +99,16 @@ public class jGeneral {
 		return true;
 	}
 
-	public boolean clickAll(int delay_min, int delay_max) {
+	public boolean clickAll(int delay_min, int delay_max, boolean track) {
 		RSItem[] items = Inventory.find(handlerXML.get().getWithdrawingItems().get(0));
 		if (items != null && deselect()) {
 			for (RSItem item : items) {
 				if (!item.click()) {
 					General.println("AutoGeneral_Error - Could not click the desired item.");
 					return false;
+				}
+				else if (track) {
+					Variables.get().addToCreated(1);
 				}
 
 				General.sleep(delay_min, delay_max);

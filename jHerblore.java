@@ -27,6 +27,7 @@ import scripts.jay_api.jGeneral;
 import scripts.jay_api.fluffeespaint.FluffeesPaint;
 import scripts.jay_api.fluffeespaint.PaintInfo;
 import scripts.jay_api.fluffeespaint.SkillsHelper;
+import scripts.jay_api.fluffeespaint.Variables;
 import scripts.jay_api.jaysgui.jaysgui;
 import scripts.jay_api.wastedbroGE.GrandExchange;
 
@@ -42,7 +43,7 @@ import java.util.regex.Pattern;
 		category = "Herblore",
 		name = "jHerblore",
 		description = "Add Jaywalker#9754 on Discord for assistance.",
-		version = 1.0)
+		version = 1.21)
 
 public class jHerblore extends Script implements Arguments, Painting, PaintInfo, Starting, Ending {
 
@@ -54,8 +55,10 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     @Override
     public String[] getPaintInfo() {
         return new String[]{"jHerlbore v" + String.format("%.2f", getClass().getAnnotation(ScriptManifest.class).version()), "Time ran: " + FLUFFEES_PAINT.getRuntimeString(handlerXML.get().getTime()),
-        					SkillsHelper.getPrettySkillName(SkillsHelper.getSkillWithMostIncrease(SKILLS.HERBLORE)) + " XP (P/H): " + SkillsHelper.getReceivedXP(SkillsHelper.getSkillWithMostIncrease(SKILLS.HERBLORE)) +
-        					" (" + SkillsHelper.getAmountPerHour(SkillsHelper.getReceivedXP(SkillsHelper.getSkillWithMostIncrease(SKILLS.HERBLORE)), this.getRunningTime()) + ")"};
+        					"Profit/Loss: " + Variables.get().getProfit() + " (" + SkillsHelper.getAmountPerHour(Variables.get().getProfit(), this.getRunningTime()) + " gp/hour)",
+        					SkillsHelper.getPrettySkillName(SkillsHelper.getSkillWithMostIncrease(SKILLS.HERBLORE)) + " XP: " + SkillsHelper.getReceivedXP(SkillsHelper.getSkillWithMostIncrease(SKILLS.HERBLORE)) +
+        					" (" + SkillsHelper.getAmountPerHour(SkillsHelper.getReceivedXP(SkillsHelper.getSkillWithMostIncrease(SKILLS.HERBLORE)), this.getRunningTime()) + " xp/hour)",
+        					"Herbs cleaned: " +  Variables.get().getItemsCreated() + " (" + SkillsHelper.getAmountPerHour(Variables.get().getItemsCreated(), this.getRunningTime())  + " herbs/hour)"};
     }
 	
 	@Override
@@ -63,7 +66,7 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
 		if (jaysgui.startScript)
 			FLUFFEES_PAINT.paint(graphics);
     }
-	
+
 	@Override
     public void onStart() {  	
         DaxWalker.setCredentials(new DaxCredentialsProvider() {
@@ -127,7 +130,7 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     			Banker.depositItemsAll();
     			if (Banker.withdraw_stackException(handlerXML.get().getWithdrawingItems().get(0), 28)) {
     				if (Banker.close()) {
-    					if (!jGeneral.get().clickAll(0, 25))
+    					if (!jGeneral.get().clickAll(0, 25, true))
     						return;
     				}
     				else
@@ -151,7 +154,7 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     						return;
     				}
     				if (Exchanger.buy(handlerXML.get().getWithdrawingItems().get(0), GrandExchange.tryGetPrice(handlerXML.get().getWithdrawingItems().get(0)).get(), handlerXML.get().getRestockingAmount(), handlerXML.get().getGE_mult_buy())) {
-    					if (!Exchanger.collectBuy(handlerXML.get().getWithdrawingItems().get(0), handlerXML.get().getRestockingAmount()))
+    					if (!Exchanger.collectBuy_removeProfit(handlerXML.get().getWithdrawingItems().get(0), handlerXML.get().getRestockingAmount()))
     						return;
     				}
     				else if ((jGeneral.get().getCash(true) + jGeneral.get().getCash(false)) < (GrandExchange.tryGetPrice(handlerXML.get().getWithdrawingItems().get(0)).get()
@@ -171,7 +174,7 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     					}
 
     					if (Exchanger.sell(item.getID(), GrandExchange.tryGetPrice(item.getID()).get(), item.getStack(), handlerXML.get().getGE_mult_sell())) {
-    						if (!Exchanger.collectSell(item.getID(), item.getStack()))
+    						if (!Exchanger.collectSell_addProfit(item.getID(), item.getStack()))
     							return;
     					}
     					else
