@@ -93,12 +93,22 @@ public class Exchanger {
 	
 	public static boolean sell(int id, int price, int amount) {
 
-		if ((Inventory.getCount(id) < amount && !Banker.withdraw(id, amount)) || 
+		RSItemDefinition def = RSItemDefinition.get(id);
+		if (def != null) {
+			if (!def.isStackable())
+				id = def.getSwitchNoteItemID();
+		}
+		else {
+			General.println("AutoGE_Error - Invalid ID.");
+			return false;
+		}
+
+		if ((Inventory.getCount(id) < amount && !Banker.withdraw(250, amount)) || 
 		    !open() || !jGeneral.deselect()) // deselect() In case GE was already open and we had a spell selected.
 				return false;
-		
+
 		String item = RSItemDefinition.get(id).getName();
-		if (item != null && Timing.waitCondition(() -> {
+		if (Timing.waitCondition(() -> {
 			General.sleep(50);
 	        return GrandExchange.offer(item, price, amount, true);
 	    }, 2000)) {
@@ -111,7 +121,7 @@ public class Exchanger {
 	}
 
 	public static boolean sell(int id, int price, int amount, float multiplier) {
-		return buy(id, (int) (price*multiplier), amount);
+		return sell(id, (int) (price*multiplier), amount);
 	}
 	
 	public static boolean collectBuy(int id, int amount) {

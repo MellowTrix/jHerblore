@@ -5,6 +5,7 @@ import org.tribot.api.Timing;
 import org.tribot.api2007.Banking;
 import org.tribot.api2007.Equipment;
 import org.tribot.api2007.GrandExchange;
+import org.tribot.api2007.Interfaces;
 import org.tribot.api2007.Inventory;
 import org.tribot.api2007.types.RSItem;
 import org.tribot.api2007.types.RSItemDefinition;
@@ -277,10 +278,17 @@ public class Banker {
 		return true;		
 	}
 	
+	// Supports withdrawing of noted items.
 	public static boolean withdraw(int id, int amount) {
 		
 		if (!openBank() || !isBankLoaded())
 			return false;
+		
+		boolean noted = false;
+		if (RSItemDefinition.get(id).isNoted()) {
+			noted = true;
+			id = RSItemDefinition.get(id).getSwitchNoteItemID();
+		}
 
 		if (RS.Banking_find(id) == null) {
 			General.println("AutoBanker_Error - Item not found in the bank.");
@@ -288,12 +296,18 @@ public class Banker {
 		}
 		
 		int currAmount = 0;
-		if (!RSItemDefinition.get(id).isStackable()) {	
-			currAmount = Inventory.getCount(id);
-			if ((28 - Inventory.getAllList().size()) == 0 || (28 - Inventory.getAllList().size()) < (amount - currAmount)) {
-				General.println("AutoBanker_Error - Not enough inventory space.");
-				return false;
+		if (!noted) {
+			if (!RSItemDefinition.get(id).isStackable()) {	
+				currAmount = Inventory.getCount(id);
+				if ((28 - Inventory.getAllList().size()) == 0 || (28 - Inventory.getAllList().size()) < (amount - currAmount)) {
+					General.println("AutoBanker_Error - Not enough inventory space.");
+					return false;
+				}
 			}
+		}
+		else {
+			Interfaces.get(12, 22).click();
+			jGeneral.defaultDynamicSleep();
 		}
 
 		if (RS.Banking_find(id).getStack() <  (amount - currAmount)) {
@@ -306,11 +320,17 @@ public class Banker {
 				jGeneral.superDynamicSleeper(300, 550, 1000, 1800, 12, 22, true);
 			else
 				jGeneral.superDynamicSleeper(300, 550, 500, 800, 5, 8, true);
+			
+			if (noted) {
+				Interfaces.get(12, 20).click();
+				jGeneral.defaultDynamicSleep();
+			}
+			
 		}
 
 		return true;
 	}
-	
+
 	public static boolean withdraw(String name, int amount) {
 
 		if (!openBank() || !isBankLoaded())
@@ -398,10 +418,17 @@ public class Banker {
 		return true;
 	}
 	
+	// Supports withdrawing of noted items.
 	public static boolean withdraw_stackException(int id, int amount) {
 	
 		if (!openBank() || !isBankLoaded())
 			return false;
+
+		boolean noted = false;
+		if (RSItemDefinition.get(id).isNoted()) {
+			noted = true;
+			id = RSItemDefinition.get(id).getSwitchNoteItemID();
+		}
 
 		if (RS.Banking_find(id) == null) {
 			General.println("AutoBanker_Error - Item not found in the bank.");
@@ -409,12 +436,18 @@ public class Banker {
 		}
 		
 		int currAmount = 0;
-		if (!RSItemDefinition.get(id).isStackable()) {
-			currAmount = Inventory.getCount(id);
-			if ((28 - Inventory.getAllList().size()) == 0 || (28 - Inventory.getAllList().size()) < (amount - currAmount)) {
-				General.println("AutoBanker_Error - Not enough inventory space.");
-				return false;
+		if (!noted) {
+			if (!RSItemDefinition.get(id).isStackable()) {	
+				currAmount = Inventory.getCount(id);
+				if ((28 - Inventory.getAllList().size()) == 0 || (28 - Inventory.getAllList().size()) < (amount - currAmount)) {
+					General.println("AutoBanker_Error - Not enough inventory space.");
+					return false;
+				}
 			}
+		}
+		else {
+			Interfaces.get(12, 22).click();
+			jGeneral.defaultDynamicSleep();
 		}
 
 		if (amount > currAmount) {
@@ -423,6 +456,11 @@ public class Banker {
 				jGeneral.superDynamicSleeper(300, 550, 1000, 1800, 12, 22, true);
 			else
 				jGeneral.superDynamicSleeper(300, 550, 500, 800, 5, 8, true);
+
+			if (noted) {
+				Interfaces.get(12, 20).click();
+				jGeneral.defaultDynamicSleep();
+			}
 		}
 
 		return true;

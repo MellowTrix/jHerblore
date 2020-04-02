@@ -165,9 +165,9 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     						General.println("AutoBanker_Error - Item not found in the bank.");
     						return;
     					}
-    						
-    					if (Exchanger.sell(handlerXML.setup_withdrawing_items.get(0), GrandExchange.tryGetPrice(handlerXML.setup_withdrawing_items.get(0)).get(), item.getStack(), handlerXML.GE_mult_sell)) {
-    						if (!Exchanger.collectSell(handlerXML.setup_withdrawing_items.get(0), item.getStack()))
+    					General.println(item.getID());
+    					if (Exchanger.sell(item.getID(), GrandExchange.tryGetPrice(item.getID()).get(), item.getStack(), handlerXML.GE_mult_sell)) {
+    						if (!Exchanger.collectSell(item.getID(), item.getStack()))
     							return;
     					}
     					else
@@ -178,8 +178,8 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     			}
     			else
     				return;		
-    							
-    		}catch(Exception e) {
+    			
+    		} catch(Exception e) {
     			e.printStackTrace();
     			return;
     		}
