@@ -1,5 +1,7 @@
 package scripts.jay_api;
 
+import java.util.List;
+
 import org.tribot.api.General;
 import org.tribot.api.Timing;
 import org.tribot.api2007.Banking;
@@ -283,7 +285,7 @@ public class Banker {
 		
 		if (!openBank() || !isBankLoaded())
 			return false;
-		
+
 		boolean noted = false;
 		if (RSItemDefinition.get(id).isNoted()) {
 			noted = true;
@@ -324,6 +326,64 @@ public class Banker {
 		return true;
 	}
 
+	// Supports withdrawing of noted items.
+	public static boolean withdraw(int amount, List<Integer> ids) {
+		
+		if (!openBank() || !isBankLoaded())
+			return false;
+
+		int inven_length = 0;
+		for (int id : ids) {			
+			boolean noted = false;
+			if (RSItemDefinition.get(id).isNoted()) {
+				noted = true;
+				id = RSItemDefinition.get(id).getSwitchNoteItemID();
+			}
+
+			if (RS.Banking_find(id) == null) {
+				General.println("AutoBanker_Error - Item not found in the bank.");
+				return false;
+			}
+		
+			int currAmount = 0;
+			if (!noted) {
+				if (!RSItemDefinition.get(id).isStackable()) {	
+					if ((28 - Inventory.getAllList().size()) == 0 || (28 - Inventory.getAllList().size()) < (amount - currAmount)) {
+						General.println("AutoBanker_Error - Not enough inventory space.");
+						return false;
+					}
+				}
+			}
+			else {
+				Interfaces.get(12, 22).click();
+				jGeneral.get().defaultDynamicSleep();
+			}
+
+			if (RS.Banking_find(id).getStack() <  (amount - currAmount)) {
+				General.println("AutoBanker_Error - Not enough quantities to withdraw of said item.");
+				return false;
+			}
+			else if (amount > currAmount) {
+				inven_length = Banking.getAll().length;
+				Banking.withdraw(amount - currAmount, id);
+				if (General.randomBoolean())
+					jGeneral.get().superDynamicSleeper(300, 550, 1000, 1800, 12, 22, true);
+				else
+					jGeneral.get().superDynamicSleeper(300, 550, 500, 800, 5, 8, true);
+				
+				if (inven_length == Inventory.getAll().length)
+					jGeneral.get().waitInventory(inven_length);
+				
+				if (noted) {
+					Interfaces.get(12, 20).click();
+					jGeneral.get().defaultDynamicSleep();
+				}
+			}
+		}
+
+		return true;
+	}
+	
 	public static boolean withdraw(String name, int amount) {
 
 		if (!openBank() || !isBankLoaded())
@@ -458,6 +518,60 @@ public class Banker {
 
 		return true;
 	}
+	
+	// Supports withdrawing of noted items.
+	public static boolean withdraw_stackException(int amount, List<Integer> ids) {
+		
+		if (!openBank() || !isBankLoaded())
+			return false;
+
+		int inven_length = 0;
+		for (int id : ids) {			
+			boolean noted = false;
+			if (RSItemDefinition.get(id).isNoted()) {
+				noted = true;
+				id = RSItemDefinition.get(id).getSwitchNoteItemID();
+			}
+
+			if (RS.Banking_find(id) == null) {
+				General.println("AutoBanker_Error - Item not found in the bank.");
+				return false;
+			}
+		
+			int currAmount = 0;
+			if (!noted) {
+				if (!RSItemDefinition.get(id).isStackable()) {	
+					if ((28 - Inventory.getAllList().size()) == 0 || (28 - Inventory.getAllList().size()) < (amount - currAmount)) {
+						General.println("AutoBanker_Error - Not enough inventory space.");
+						return false;
+					}
+				}
+			}
+			else {
+				Interfaces.get(12, 22).click();
+				jGeneral.get().defaultDynamicSleep();
+			}
+
+			if (amount > currAmount) {
+				inven_length = Inventory.getAll().length;
+				Banking.withdraw(amount - currAmount, id);
+				if (General.randomBoolean())
+					jGeneral.get().superDynamicSleeper(300, 550, 1000, 1800, 12, 22, true);
+				else
+					jGeneral.get().superDynamicSleeper(300, 550, 500, 800, 5, 8, true);
+
+				if (inven_length == Inventory.getAll().length)
+					jGeneral.get().waitInventory(inven_length);
+				
+				if (noted) {
+					Interfaces.get(12, 20).click();
+					jGeneral.get().defaultDynamicSleep();
+				}
+			}
+		}
+
+		return true;
+	}
 
 	public static boolean withdraw_stackException(String name, int amount) {
 		
@@ -491,7 +605,7 @@ public class Banker {
 	}
 	
 	public static boolean walkToBank() {
-		if (handlerXML.get().isWalkingToBank() == true)
+		if (handlerXML.get().isWalkingToBank() == false)
 			return true;
 			
 		if (!Banking.isInBank()) {
@@ -511,7 +625,7 @@ public class Banker {
 	}
 	
 	public static boolean walkToBank(WalkingCondition condition) {
-		if (handlerXML.get().isWalkingToBank() == true)
+		if (handlerXML.get().isWalkingToBank() == false)
 			return true;
 			
 		if (!Banking.isInBank()) {
@@ -531,7 +645,7 @@ public class Banker {
 	}
 	
 	public static boolean walkToBank(RunescapeBank bank) {
-		if (handlerXML.get().isWalkingToBank() == true)
+		if (handlerXML.get().isWalkingToBank() == false)
 			return true;
 
 		if (bank != null) {
@@ -553,7 +667,7 @@ public class Banker {
 	}
 	
 	public static boolean walkToBank(RunescapeBank bank, WalkingCondition condition) {
-		if (handlerXML.get().isWalkingToBank() == true)
+		if (handlerXML.get().isWalkingToBank() == false)
 			return true;
 
 		if (bank != null) {
@@ -576,7 +690,7 @@ public class Banker {
 
 	// Walks to specified bank if not set to null, otherwise walk to nearest bank.
 	public static boolean walkToBank_default(RunescapeBank bank) {
-		if (handlerXML.get().isWalkingToBank() == true)
+		if (handlerXML.get().isWalkingToBank() == false)
 			return true;
 		
 		if (bank != null) {
@@ -598,7 +712,7 @@ public class Banker {
 	}
 	
 	public static boolean walkToBank_default(RunescapeBank bank, WalkingCondition condition) {
-		if (handlerXML.get().isWalkingToBank() == true)
+		if (handlerXML.get().isWalkingToBank() == false)
 			return true;
 		
 		if (bank != null) {

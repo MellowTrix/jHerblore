@@ -62,7 +62,7 @@ public class GrandExchangePriceService implements IRsItemPriceService
         catch (Exception e)
         {
             e.printStackTrace();
-            General.println("Could not load RSItem via Grand Exchange API");
+            General.println("Could not load RSItem (" + itemId + ")via Grand Exchange API");
         }
 
         return Optional.empty();

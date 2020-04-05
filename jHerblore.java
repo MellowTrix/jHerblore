@@ -1,6 +1,7 @@
 package scripts;
 
 import org.tribot.api.General;
+import org.tribot.api2007.Inventory;
 import org.tribot.api2007.Login;
 import org.tribot.api2007.Player;
 import org.tribot.api2007.Skills.SKILLS;
@@ -29,7 +30,7 @@ import scripts.jay_api.fluffeespaint.PaintInfo;
 import scripts.jay_api.fluffeespaint.SkillsHelper;
 import scripts.jay_api.fluffeespaint.Variables;
 import scripts.jay_api.jaysgui.jaysgui;
-import scripts.jay_api.wastedbroGE.GrandExchange;
+import scripts.jay_api.wastedbroGE.GrandExchangeService;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -43,11 +44,12 @@ import java.util.regex.Pattern;
 		category = "Herblore",
 		name = "jHerblore",
 		description = "Add Jaywalker#9754 on Discord for assistance.",
-		version = 1.21)
+		version = 1.30)
 
 public class jHerblore extends Script implements Arguments, Painting, PaintInfo, Starting, Ending {
 
     private File newFile = null;
+    private String method_track = "Potions mixed: ", method_track_2 = " potions/hour)";
     
 	private final FluffeesPaint FLUFFEES_PAINT = new FluffeesPaint(this, FluffeesPaint.PaintLocations.TOP_LEFT_CHATBOX, new Color[]{new Color(255, 251, 255)}, "Trebuchet MS", new Color[]{new Color(0, 100, 0, 189)},
             new Color[]{new Color(39, 95, 175)}, 1, false, 5, 3, 0);
@@ -58,7 +60,7 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
         					"Profit/Loss: " + Variables.get().getProfit() + " (" + SkillsHelper.getAmountPerHour(Variables.get().getProfit(), this.getRunningTime()) + " gp/hour)",
         					SkillsHelper.getPrettySkillName(SkillsHelper.getSkillWithMostIncrease(SKILLS.HERBLORE)) + " XP: " + SkillsHelper.getReceivedXP(SkillsHelper.getSkillWithMostIncrease(SKILLS.HERBLORE)) +
         					" (" + SkillsHelper.getAmountPerHour(SkillsHelper.getReceivedXP(SkillsHelper.getSkillWithMostIncrease(SKILLS.HERBLORE)), this.getRunningTime()) + " xp/hour)",
-        					"Herbs cleaned: " +  Variables.get().getItemsCreated() + " (" + SkillsHelper.getAmountPerHour(Variables.get().getItemsCreated(), this.getRunningTime())  + " herbs/hour)"};
+        					method_track +  Variables.get().getItemsCreated() + " (" + SkillsHelper.getAmountPerHour(Variables.get().getItemsCreated(), this.getRunningTime())  + method_track_2};
     }
 	
 	@Override
@@ -110,20 +112,74 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
         		handlerXML.get().skipGUI(newFile, false);
         }
     }
+
+    public int getUnfPot(int id) {
+    	if (id == 249)
+    		id = 91;
+    	else if (id == 251)
+    		id = 93;
+    	else if (id == 253)
+    		id = 95;
+    	else if (id == 255)
+    		id = 97;
+    	else if (id == 257)
+    		id = 99;
+    	else if (id == 2998)
+    		id = 3002;
+    	else if (id == 259)
+    		id = 101;
+    	else if (id == 261)
+    		id = 103;
+    	else if (id == 263)
+    		id = 105;
+    	else if (id == 3000)
+    		id = 3004;
+    	else if (id == 265)
+    		id = 107;
+    	else if (id == 2481)
+    		id = 2483;
+    	else if (id == 267)
+    		id = 109;
+    	else if (id == 269)
+    		id = 111;
+    		
+    	return id;
+    }
+
+    public int getCleanHerb(int id) {
+    	if (id == 199)
+    		id = 249;
+    	else if (id == 201)
+    		id = 251;
+    	else if (id == 203)
+    		id = 253;
+    	else if (id == 205)
+    		id = 255;
+    	else if (id == 207)
+    		id = 257;
+    	else if (id == 3049)
+    		id = 2998;
+    	else if (id == 209)
+    		id = 259;
+    	else if (id == 211)
+    		id = 261;
+    	else if (id == 213)
+    		id = 263;
+    	else if (id == 3051)
+    		id = 3000;
+    	else if (id == 215)
+    		id = 265;
+    	else if (id == 2485)
+    		id = 2481;
+    	else if (id == 217)
+    		id = 267;
+    	else if (id == 219)
+    		id = 269;
+    		
+    	return id;
+    }
     
-    @Override
-    public void run() {
-    	if (jaysgui.endScript)
-    		return;
-    	
-        while (Login.getLoginState() != Login.STATE.INGAME)
-            General.sleep(400);
-    	
-    	SkillsHelper.setStartSkills();
-    	
-    	if (handlerXML.get().getRestockingAmount() < 28)
-    		handlerXML.get().setRestockingAmount(28);
-    	
+    public void cleaning() {
     	while(true) {
     		try {
     			Banker.walkToBank(Walker.get().condition_enableRun);
@@ -153,11 +209,12 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     					if (!Banker.walkToBank(RunescapeBank.GRAND_EXCHANGE, Walker.get().condition_enableRun))
     						return;
     				}
-    				if (Exchanger.buy(handlerXML.get().getWithdrawingItems().get(0), GrandExchange.tryGetPrice(handlerXML.get().getWithdrawingItems().get(0)).get(), handlerXML.get().getRestockingAmount(), handlerXML.get().getGE_mult_buy())) {
+
+    				if (Exchanger.buy(handlerXML.get().getWithdrawingItems().get(0), GrandExchangeService.tryGetPrice(handlerXML.get().getWithdrawingItems().get(0)).get(), handlerXML.get().getRestockingAmount(), handlerXML.get().getGE_mult_buy())) {
     					if (!Exchanger.collectBuy_removeProfit(handlerXML.get().getWithdrawingItems().get(0), handlerXML.get().getRestockingAmount()))
     						return;
     				}
-    				else if ((jGeneral.get().getCash(true) + jGeneral.get().getCash(false)) < (GrandExchange.tryGetPrice(handlerXML.get().getWithdrawingItems().get(0)).get()
+    				else if ((jGeneral.get().getCash(true) + jGeneral.get().getCash(false)) < (GrandExchangeService.tryGetPrice(handlerXML.get().getWithdrawingItems().get(0)).get()
     						* handlerXML.get().getRestockingAmount() * handlerXML.get().getGE_mult_buy())) {
 
     					String item_name = RSItemDefinition.get(handlerXML.get().getWithdrawingItems().get(0)).getName().substring(6);
@@ -173,7 +230,7 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     						return;
     					}
 
-    					if (Exchanger.sell(item.getID(), GrandExchange.tryGetPrice(item.getID()).get(), item.getStack(), handlerXML.get().getGE_mult_sell())) {
+    					if (Exchanger.sell(item.getID(), GrandExchangeService.tryGetPrice(item.getID()).get(), item.getStack(), handlerXML.get().getGE_mult_sell())) {
     						if (!Exchanger.collectSell_addProfit(item.getID(), item.getStack()))
     							return;
     					}
@@ -190,6 +247,103 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     			e.printStackTrace();
     			return;
     		}
+    	}
+    }
+   
+    public void mixing_unf() {
+		handlerXML.get().getWithdrawingItems().add(getCleanHerb(handlerXML.get().getWithdrawingItems().get(0)));
+    	handlerXML.get().getWithdrawingItems().add(227);
+    	handlerXML.get().getWithdrawingItems().remove(0);
+
+    	while(true) {
+    		try {
+    			Banker.walkToBank(Walker.get().condition_enableRun);
+    			Banker.depositItemsAll();    			
+    			if (Banker.withdraw_stackException(14, handlerXML.get().getWithdrawingItems())) {
+    				if (Banker.close()) {
+    					if (!jGeneral.get().clickMix(handlerXML.get().getWithdrawingItems().get(0), 227, getUnfPot(handlerXML.get().getWithdrawingItems().get(0)), true))
+    						return;
+    				}
+    				else
+    					return;
+    			}
+    			else if (handlerXML.get().isRestocking()) {
+
+    				if (Inventory.getAll().length != 0) {
+    					Banker.depositItemsAll();
+    				}
+    				
+    				if (Player.getPosition().distanceTo(new RSTile(3165, 3487, 0)) > 7) {			
+    					if (Player.getPosition().distanceTo(new RSTile(3165, 3487, 0)) > 60) { // If we are a bit further away from GE then check the bank for RoW, will speed up the traveling.
+    						if (!Banker.withdraw("Ring of wealth (1)", 1)) {
+    							if (!Banker.withdraw("Ring of wealth (2)", 1)) {
+    								if (!Banker.withdraw("Ring of wealth (3)", 1)) {
+    									if (!Banker.withdraw("Ring of wealth (4)", 1)) {
+    										Banker.withdraw("Ring of wealth (5)", 1);
+    									}
+    								}
+    							}
+    						}
+    					}
+    					
+    					if (!Banker.walkToBank(RunescapeBank.GRAND_EXCHANGE, Walker.get().condition_enableRun))
+    						return;
+    				}
+
+    				if (Exchanger.buy(handlerXML.get().getWithdrawingItems(), handlerXML.get().getRestockingAmount(), handlerXML.get().getGE_mult_buy())) {
+    					if (!Exchanger.collectBuy_removeProfit(handlerXML.get().getWithdrawingItems().get(0), handlerXML.get().getRestockingAmount()) || !Exchanger.collectBuy_removeProfit(227, handlerXML.get().getRestockingAmount()))
+    						return;
+    				}
+    				else if ((jGeneral.get().getCash(true) + jGeneral.get().getCash(false)) < (GrandExchangeService.tryGetPrice(handlerXML.get().getWithdrawingItems().get(0)).get()
+    						* handlerXML.get().getRestockingAmount() * handlerXML.get().getGE_mult_buy() + GrandExchangeService.tryGetPrice(227).get() * handlerXML.get().getRestockingAmount() * 2.0f)) {
+
+    					RSItem item = RS.Banking_find(getUnfPot(handlerXML.get().getWithdrawingItems().get(0)));
+    					if (item != null) {
+    						if (item.getStack() == 0) {
+    							General.println("AutoBanker_Error - Item not found in the bank.");
+    							return;
+    						}
+    					}
+    					else {
+    						General.println("AutoBanker_Error - Item not found in the bank.");
+    						return;
+    					}
+
+    					if (Exchanger.sell(item.getID(), GrandExchangeService.tryGetPrice(item.getID()).get(), item.getStack(), handlerXML.get().getGE_mult_sell())) {
+    						if (!Exchanger.collectSell_addProfit(item.getID(), item.getStack()))
+    							return;
+    					}
+    					else
+    						return;
+    				}
+    				else
+    					return;
+    			}
+    			else
+    				return;
+    			
+    		} catch(Exception e) {
+    			e.printStackTrace();
+    			return;
+    		}
+    	}
+    }
+
+	@Override
+    public void run() {
+    	if (jaysgui.endScript)
+    		return;
+    	
+        while (Login.getLoginState() != Login.STATE.INGAME)
+            General.sleep(400);
+    	
+    	SkillsHelper.setStartSkills();
+    	
+    	if (handlerXML.get().getHerbMethod() == 0 || handlerXML.get().getHerbMethod() == 1)
+    		mixing_unf();
+    	else {
+    		method_track = "Herbs cleaned: "; method_track_2 = " herbs/hour)";
+    		cleaning();
     	}
     }
 

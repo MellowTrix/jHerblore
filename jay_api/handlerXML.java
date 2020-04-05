@@ -39,7 +39,7 @@ public class handlerXML {
 	private boolean walking_walktobank = false;
 	private boolean GE_restocking = false;
 	
-	private int GE_restocking_amount = 0;
+	private int GE_restocking_amount = 0, herb_method = 0;
 	private float GE_mult_buy = 1.0f, GE_mult_sell = 1.0f;
 
 	private RunescapeBank bank = null;
@@ -80,6 +80,10 @@ public class handlerXML {
     
     public void setRestockingAmount(int val) {
     	GE_restocking_amount = val;
+    }
+    
+    public int getHerbMethod() {
+    	return herb_method;
     }
     
     public float getGE_mult_buy() {
@@ -188,7 +192,7 @@ public class handlerXML {
 				bank_loc.appendChild(docs.createTextNode("-1"));
 				walk.appendChild(bank_loc);
 				
-				// APPENDINGGE ELEMENT TO SETTINGS
+				// APPENDING ELEMENT TO SETTINGS
 				Element ge = docs.createElement("GE");
 				rootElement.appendChild(ge);
 				
@@ -205,8 +209,17 @@ public class handlerXML {
 				ge.appendChild(restocking_mult_buy);
 				
 				Element restocking_mult_sell= docs.createElement("restocking_mult_sell");
-				restocking_mult_sell.appendChild(docs.createTextNode("-10"));
+				restocking_mult_sell.appendChild(docs.createTextNode("-49"));
 				ge.appendChild(restocking_mult_sell);
+				
+				// APPENDING ELEMENT TO SETTINGS
+				Element herb = docs.createElement("HERBLORE");
+				rootElement.appendChild(herb);
+				
+				Element herb_method = docs.createElement("herblore_method");
+				herb_method.appendChild(docs.createTextNode("0"));
+				herb.appendChild(herb_method);
+				
 				// SETTINGS STRUCTURE FOR SETTINGS --- END
                
 				saveFile(file, docs); // Write the content into xml file
@@ -291,9 +304,9 @@ public class handlerXML {
 
 			doc.getDocumentElement().normalize();
 			
-			/*
-			 * Future settings to be added here for Herblore
-			 */
+			Element eElement = (Element) doc.getElementsByTagName("HERBLORE").item(0);
+			
+			eElement.getElementsByTagName("herblore_method").item(0).setTextContent(herb[0]);
 			
 			// Parsing complete ------------------------
         
@@ -385,6 +398,10 @@ public class handlerXML {
 			c = eElement.getElementsByTagName("restocking_mult_sell").item(0).getTextContent();
 			GE_mult_sell = (100.0f + Float.parseFloat(c))/100.0f;
 		}
+		
+		eElement = (Element) doc.getElementsByTagName("HERBLORE").item(0);
+
+		herb_method = Integer.parseInt(eElement.getElementsByTagName("herblore_method").item(0).getTextContent());
 	}
 	
 	public String getSetting(File file, String parent, String setting) {

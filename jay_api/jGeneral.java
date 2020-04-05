@@ -8,6 +8,7 @@ import org.tribot.api2007.ChooseOption;
 import org.tribot.api2007.Game;
 import org.tribot.api2007.Inventory;
 import org.tribot.api2007.Magic;
+import org.tribot.api2007.Player;
 import org.tribot.api2007.types.RSItem;
 
 import scripts.jay_api.fluffeespaint.Variables;
@@ -68,6 +69,28 @@ public class jGeneral {
 		return false;
 	}
 	
+	public boolean waitInventory_fast(int val) {
+		if (Timing.waitCondition(() -> {
+			General.sleep(50,250);
+			return Inventory.getAll().length != val;
+		}, General.random(3000, 5000))) {
+			return true; // We already slept after depositing so lets not do it again.
+		}
+
+		return false;
+	}
+	
+	public boolean waitInventory_reverse(int val) {
+		if (Timing.waitCondition(() -> {
+			General.sleep(300, 600);
+			return Inventory.getAll().length == val;
+		}, General.random(3000, 5000))) {
+			return true; // We already slept after depositing so lets not do it again.
+		}
+
+		return false;
+	}
+	
 	public boolean waitInventory() {
 		if (Timing.waitCondition(() -> {
 			General.sleep(300, 600);
@@ -117,6 +140,46 @@ public class jGeneral {
 			return true;
 		}
 		
+		General.println("AutoGeneral_Error - Could not find the item.");
+		return false;
+	}
+	
+	public boolean clickMix(int itemID, int itemID_2, int finishedItem, boolean track) {
+		RSItem item = RS.Inventory_find(itemID);
+		RSItem item_2 = RS.Inventory_find(itemID_2);
+		if (item != null && item_2 != null && deselect()) {
+			if (item.click()) {
+				shortDynamicSleep();
+				if (item_2.click()) {
+					defaultDynamicSleep();
+					int inv_length = Inventory.getAll().length;
+					Mouse.clickBox(230,403,285,447,1);
+					General.sleep(1000);
+
+					while (Timing.waitCondition(() -> {
+						General.sleep(50);
+						return Player.getAnimation() == 363;
+					}, 550)) {
+						continue;
+					}
+					
+					if (!waitInventory_fast(inv_length)) {
+						General.println("AutoGeneral_Error - Could not click the box.");
+						return false;
+					}
+					
+					if (track)
+						Variables.get().addToCreated(Inventory.getCount(finishedItem));
+					
+					return true;
+				}
+			}
+			
+			General.println("AutoGeneral_Error - Could not click the desired item.");
+			return false;
+		}
+		
+		General.println("AutoGeneral_Error - Could not find the item.");
 		return false;
 	}
 	

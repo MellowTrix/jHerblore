@@ -1,6 +1,6 @@
 package scripts.jay_api.fluffeespaint;
 
-import scripts.jay_api.wastedbroGE.GrandExchange;
+import scripts.jay_api.wastedbroGE.GrandExchangeService;
 
 public class Variables {
 
@@ -18,7 +18,7 @@ public class Variables {
     }
 
     public void addToProfit(int itemID, int itemCount) {
-        profit += GrandExchange.tryGetPrice(Integer.valueOf(itemID)).get() * itemCount;
+        profit += GrandExchangeService.tryGetPrice(Integer.valueOf(itemID)).get() * itemCount;
     }
     
     public void addToProfit(int amount) {
@@ -26,11 +26,11 @@ public class Variables {
     }
 
     public void removeFromProfit(int itemID, int itemCount) {
-    	profit -= GrandExchange.tryGetPrice(Integer.valueOf(itemID)).get() * itemCount;
+    	profit -= GrandExchangeService.tryGetPrice(Integer.valueOf(itemID)).get() * itemCount;
     }
     
     public void removeFromProfit(int itemID, int itemCount, float multiplier, int fixedDeduct) {
-    	profit -= GrandExchange.tryGetPrice(Integer.valueOf(itemID)).get() * itemCount * multiplier - fixedDeduct;
+    	profit -= GrandExchangeService.tryGetPrice(Integer.valueOf(itemID)).get() * itemCount * multiplier - fixedDeduct;
     }
     
     public int getItemsCreated() {
