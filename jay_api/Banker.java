@@ -152,7 +152,7 @@ public class Banker {
 		
 		if (Inventory.getAll().length == 0) {
 			General.println("AutoBanker_Error - You have no items in your inventory.");
-			return false;
+			return true;
 		}
 		
 		if (!openBank() || !isBankLoaded())
@@ -201,15 +201,14 @@ public class Banker {
 			}
 		}
 
-		jGeneral.get().defaultDynamicSleep();
-		return true;	
+		return false;	
 	}	
 
 	// Does not take 'setup_depositing_exceptions' into account
 	public static boolean depositItemsAll() {
 		if (Inventory.getAll().length == 0) {
 			General.println("AutoBanker_Error - You have no items in your inventory.");
-			return false;
+			return true;
 		}
 		
 		if (!openBank() || !isBankLoaded())
@@ -220,8 +219,7 @@ public class Banker {
 		if (jGeneral.get().waitInventory())
 			return true; // We already slept after depositing so lets not do it again.
 
-		jGeneral.get().defaultDynamicSleep();
-		return true;
+		return false;
 	}
 	
 	public static boolean withdraw() {
@@ -267,7 +265,21 @@ public class Banker {
 					return false;
 				}
 				else {
-					Banking.withdraw(withdrawAmount - currAmount, handlerXML.get().getWithdrawingItems().get(i));
+					jGeneral.get().setCount(0);
+					final int fixedAmount = withdrawAmount - currAmount, fixedId = handlerXML.get().getWithdrawingItems().get(i);
+					if (!Timing.waitCondition(() -> {
+						if (jGeneral.get().getCount() != 0)
+							General.sleep(200, 300);
+						
+						jGeneral.get().occurenceCounter();
+						return Banking.withdraw(fixedAmount, fixedId);
+					}, General.random(3000, 5000))) {
+						General.println("AutoBanker_Error - Could not withdraw itemID: (" + fixedId + ")." );
+						return false;
+					}
+					
+					jGeneral.get().setCount(0);
+
 					if (General.randomBoolean())
 						jGeneral.get().superDynamicSleeper(300, 550, 1000, 1800, 12, 22, true);
 					else
@@ -316,7 +328,21 @@ public class Banker {
 			return false;
 		}
 		else if (amount > currAmount) {
-			Banking.withdraw(amount - currAmount, id);
+			jGeneral.get().setCount(0);
+			final int fixedAmount = amount - currAmount, fixedId = id;
+			if (!Timing.waitCondition(() -> {
+				if (jGeneral.get().getCount() != 0)
+					General.sleep(200, 300);
+				
+				jGeneral.get().occurenceCounter();
+				return Banking.withdraw(fixedAmount, fixedId);
+			}, General.random(3000, 5000))) {
+				General.println("AutoBanker_Error - Could not withdraw itemID: (" + fixedId + ")." );
+				return false;
+			}
+			
+			jGeneral.get().setCount(0);
+
 			if (General.randomBoolean())
 				jGeneral.get().superDynamicSleeper(300, 550, 1000, 1800, 12, 22, true);
 			else
@@ -333,6 +359,7 @@ public class Banker {
 			return false;
 
 		int inven_length = 0;
+		int currAmount;
 		for (int id : ids) {			
 			boolean noted = false;
 			if (RSItemDefinition.get(id).isNoted()) {
@@ -345,9 +372,10 @@ public class Banker {
 				return false;
 			}
 		
-			int currAmount = 0;
+			currAmount = 0;
 			if (!noted) {
-				if (!RSItemDefinition.get(id).isStackable()) {	
+				if (!RSItemDefinition.get(id).isStackable()) {
+					currAmount = Inventory.getCount(id);
 					if ((28 - Inventory.getAllList().size()) == 0 || (28 - Inventory.getAllList().size()) < (amount - currAmount)) {
 						General.println("AutoBanker_Error - Not enough inventory space.");
 						return false;
@@ -365,7 +393,22 @@ public class Banker {
 			}
 			else if (amount > currAmount) {
 				inven_length = Banking.getAll().length;
-				Banking.withdraw(amount - currAmount, id);
+
+				jGeneral.get().setCount(0);
+				final int fixedAmount = amount - currAmount, fixedId = id;
+				if (!Timing.waitCondition(() -> {
+					if (jGeneral.get().getCount() != 0)
+						General.sleep(200, 300);
+					
+					jGeneral.get().occurenceCounter();
+					return Banking.withdraw(fixedAmount, fixedId);
+				}, General.random(3000, 5000))) {
+					General.println("AutoBanker_Error - Could not withdraw itemID: (" + fixedId + ")." );
+					return false;
+				}
+				
+				jGeneral.get().setCount(0);
+
 				if (General.randomBoolean())
 					jGeneral.get().superDynamicSleeper(300, 550, 1000, 1800, 12, 22, true);
 				else
@@ -409,7 +452,21 @@ public class Banker {
 			return false;
 		}
 		else if (amount > currAmount) {
-			Banking.withdraw(amount - currAmount, item.getID());
+			jGeneral.get().setCount(0);
+			final int fixedAmount = amount - currAmount, fixedId = item.getID();
+			if (!Timing.waitCondition(() -> {
+				if (jGeneral.get().getCount() != 0)
+					General.sleep(200, 300);
+				
+				jGeneral.get().occurenceCounter();
+				return Banking.withdraw(fixedAmount, fixedId);
+			}, General.random(3000, 5000))) {
+				General.println("AutoBanker_Error - Could not withdraw itemID: (" + fixedId + ")." );
+				return false;
+			}
+			
+			jGeneral.get().setCount(0);
+
 			if (General.randomBoolean())
 				jGeneral.get().superDynamicSleeper(300, 550, 1000, 1800, 12, 22, true);
 			else
@@ -458,7 +515,21 @@ public class Banker {
 					return false;
 				}
 				else {
-					Banking.withdraw(withdrawAmount - currAmount, handlerXML.get().getWithdrawingItems().get(i));
+					jGeneral.get().setCount(0);
+					final int fixedAmount = withdrawAmount - currAmount, fixedId = handlerXML.get().getWithdrawingItems().get(i);
+					if (!Timing.waitCondition(() -> {
+						if (jGeneral.get().getCount() != 0)
+							General.sleep(200, 300);
+						
+						jGeneral.get().occurenceCounter();
+						return Banking.withdraw(fixedAmount, fixedId);
+					}, General.random(3000, 5000))) {
+						General.println("AutoBanker_Error - Could not withdraw itemID: (" + fixedId + ")." );
+						return false;
+					}
+					
+					jGeneral.get().setCount(0);
+
 					if (General.randomBoolean())
 						jGeneral.get().superDynamicSleeper(300, 550, 1000, 1800, 12, 22, true);
 					else
@@ -504,7 +575,21 @@ public class Banker {
 		}
 
 		if (amount > currAmount) {
-			Banking.withdraw(amount - currAmount, id);
+			jGeneral.get().setCount(0);
+			final int fixedAmount = amount - currAmount, fixedId = id;
+			if (!Timing.waitCondition(() -> {
+				if (jGeneral.get().getCount() != 0)
+					General.sleep(200, 300);
+				
+				jGeneral.get().occurenceCounter();
+				return Banking.withdraw(fixedAmount, fixedId);
+			}, General.random(3000, 5000))) {
+				General.println("AutoBanker_Error - Could not withdraw itemID: (" + fixedId + ")." );
+				return false;
+			}
+			
+			jGeneral.get().setCount(0);
+
 			if (General.randomBoolean())
 				jGeneral.get().superDynamicSleeper(300, 550, 1000, 1800, 12, 22, true);
 			else
@@ -526,6 +611,7 @@ public class Banker {
 			return false;
 
 		int inven_length = 0;
+		int currAmount;
 		for (int id : ids) {			
 			boolean noted = false;
 			if (RSItemDefinition.get(id).isNoted()) {
@@ -538,9 +624,10 @@ public class Banker {
 				return false;
 			}
 		
-			int currAmount = 0;
+			currAmount = 0;
 			if (!noted) {
-				if (!RSItemDefinition.get(id).isStackable()) {	
+				if (!RSItemDefinition.get(id).isStackable()) {
+					currAmount = Inventory.getCount(id);
 					if ((28 - Inventory.getAllList().size()) == 0 || (28 - Inventory.getAllList().size()) < (amount - currAmount)) {
 						General.println("AutoBanker_Error - Not enough inventory space.");
 						return false;
@@ -554,7 +641,22 @@ public class Banker {
 
 			if (amount > currAmount) {
 				inven_length = Inventory.getAll().length;
-				Banking.withdraw(amount - currAmount, id);
+				
+				jGeneral.get().setCount(0);
+				final int fixedAmount = amount - currAmount, fixedId = id;
+				if (!Timing.waitCondition(() -> {
+					if (jGeneral.get().getCount() != 0)
+						General.sleep(200, 300);
+					
+					jGeneral.get().occurenceCounter();
+					return Banking.withdraw(fixedAmount, fixedId);
+				}, General.random(3000, 5000))) {
+					General.println("AutoBanker_Error - Could not withdraw itemID: (" + fixedId + ")." );
+					return false;
+				}
+				
+				jGeneral.get().setCount(0);
+				
 				if (General.randomBoolean())
 					jGeneral.get().superDynamicSleeper(300, 550, 1000, 1800, 12, 22, true);
 				else
@@ -593,8 +695,22 @@ public class Banker {
 			}
 		}
 
-		if (amount > currAmount) {
-			Banking.withdraw(amount - currAmount, item.getID());
+		if (amount > currAmount) {			
+			jGeneral.get().setCount(0);
+			final int fixedAmount = amount - currAmount, fixedId = item.getID();
+			if (!Timing.waitCondition(() -> {
+				if (jGeneral.get().getCount() != 0)
+					General.sleep(200, 300);
+				
+				jGeneral.get().occurenceCounter();
+				return Banking.withdraw(fixedAmount, fixedId);
+			}, General.random(3000, 5000))) {
+				General.println("AutoBanker_Error - Could not withdraw itemID: (" + fixedId + ")." );
+				return false;
+			}
+			
+			jGeneral.get().setCount(0);
+
 			if (General.randomBoolean())
 				jGeneral.get().superDynamicSleeper(300, 550, 1000, 1800, 12, 22, true);
 			else
@@ -618,10 +734,11 @@ public class Banker {
 				return true;
 
 			General.println("AutoBanker_Error - Method call count: " + jGeneral.get().getCount());
+			General.println("AutoBanker_Error - Could not generate path to bank.");
+			return false;
 		}
 
-		General.println("AutoBanker_Error - Could not generate path to bank.");
-		return false;
+		return true;
 	}
 	
 	public static boolean walkToBank(WalkingCondition condition) {
@@ -638,10 +755,11 @@ public class Banker {
 				return true;
 
 			General.println("AutoBanker_Error - Method call count: " + jGeneral.get().getCount());
+			General.println("AutoBanker_Error - Could not generate path to bank.");
+			return false;
 		}
 
-		General.println("AutoBanker_Error - Could not generate path to bank.");
-		return false;	
+		return true;
 	}
 	
 	public static boolean walkToBank(RunescapeBank bank) {

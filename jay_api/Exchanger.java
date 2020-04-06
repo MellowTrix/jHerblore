@@ -117,6 +117,14 @@ public class Exchanger {
 		if(GEInterfaces.SEARCH_ITEM_INPUT_TEXT.isVisible()) {
 			String item = RSItemDefinition.get(id).getName();
 			if (item != null) {
+				if (!Timing.waitCondition(() -> {
+					General.sleep(50);
+					return !Interfaces.get(162, 45).isHidden();
+				}, General.random(4000, 5000))) {
+					General.println("AutoGE_Error - Failed to get ITEM_INPUT_TEXT_BOX.");
+					return false;
+				}
+
 				Keyboard.typeString(item);
 				if(Timing.waitCondition(() -> {
 					General.sleep(200);
@@ -201,6 +209,14 @@ public class Exchanger {
 			if(GEInterfaces.SEARCH_ITEM_INPUT_TEXT.isVisible()) {
 				String item = RSItemDefinition.get(handlerXML.get().getWithdrawingItems().get(j)).getName();
 				if (item != null) {
+					if (!Timing.waitCondition(() -> {
+						General.sleep(50);
+						return !Interfaces.get(162, 45).isHidden();
+					}, General.random(2000, 3000))) {
+						General.println("AutoGE_Error - Failed to get ITEM_INPUT_TEXT_BOX.");
+						return false;
+					}
+					
 					Keyboard.typeString(item);
 					if(Timing.waitCondition(() -> {
 						General.sleep(200);
@@ -327,14 +343,10 @@ public class Exchanger {
 		    }, 2000) || !getCompleted())
 				return false;
 
-			RSItem[] items = GrandExchange.getCollectItems();
-			if (items != null && GrandExchange.collectItems(COLLECT_METHOD.BANK, items)) {
-				RSItem gold = RS.getItem_specific(items, 995);
-				if (gold != null)
-					Variables.get().addToProfit(gold.getStack());
-				
-				jGeneral.get().waitInventory(Inventory.getAll().length);		
-				jGeneral.get().defaultDynamicSleep();
+			RSItem gold = RS.getItem_specific(GrandExchange.getCollectItems(), 995);
+			if (gold != null && GrandExchange.collectItems(COLLECT_METHOD.BANK, gold)) {
+				Variables.get().addToProfit(gold.getStack());
+				jGeneral.get().waitInventory(Inventory.getAll().length);
 				return true;
 			}
 					
@@ -354,12 +366,9 @@ public class Exchanger {
 		    }, 2000) || !getCompleted())
 				return false;
 
-			RSItem[] items = GrandExchange.getCollectItems();
-			if (items != null && GrandExchange.collectItems(COLLECT_METHOD.BANK, items)) {
-				if (RS.getItem_specific(items, 995) != null)
-					jGeneral.get().waitInventory(Inventory.getAll().length);
-				
-				jGeneral.get().defaultDynamicSleep();
+			RSItem gold = RS.getItem_specific(GrandExchange.getCollectItems(), 995);
+			if (gold != null && GrandExchange.collectItems(COLLECT_METHOD.BANK, gold)) {
+				jGeneral.get().waitInventory(Inventory.getAll().length);
 				return true;
 			}
 					
@@ -387,7 +396,7 @@ public class Exchanger {
 		if (Timing.waitCondition(() -> {
 			General.sleep(50);
 	        return GrandExchange.getStatus() == STATUS.COMPLETED;
-	    }, 2000))
+	    }, 10000))
 			return true;
 		
 		General.println("AutoGE_Error - Offer is not completed yet.");

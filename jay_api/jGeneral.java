@@ -1,14 +1,16 @@
 package scripts.jay_api;
 
+import java.util.List;
+
 import org.tribot.api.General;
 import org.tribot.api.Timing;
 import org.tribot.api.input.Mouse;
 import org.tribot.api.util.abc.ABCUtil;
 import org.tribot.api2007.ChooseOption;
 import org.tribot.api2007.Game;
+import org.tribot.api2007.Interfaces;
 import org.tribot.api2007.Inventory;
 import org.tribot.api2007.Magic;
-import org.tribot.api2007.Player;
 import org.tribot.api2007.types.RSItem;
 
 import scripts.jay_api.fluffeespaint.Variables;
@@ -69,17 +71,6 @@ public class jGeneral {
 		return false;
 	}
 	
-	public boolean waitInventory_fast(int val) {
-		if (Timing.waitCondition(() -> {
-			General.sleep(50,250);
-			return Inventory.getAll().length != val;
-		}, General.random(3000, 5000))) {
-			return true; // We already slept after depositing so lets not do it again.
-		}
-
-		return false;
-	}
-	
 	public boolean waitInventory_reverse(int val) {
 		if (Timing.waitCondition(() -> {
 			General.sleep(300, 600);
@@ -90,7 +81,7 @@ public class jGeneral {
 
 		return false;
 	}
-	
+
 	public boolean waitInventory() {
 		if (Timing.waitCondition(() -> {
 			General.sleep(300, 600);
@@ -123,18 +114,50 @@ public class jGeneral {
 	}
 
 	public boolean clickAll(int delay_min, int delay_max, boolean track) {
-		RSItem[] items = Inventory.find(handlerXML.get().getWithdrawingItems().get(0));
+		List<RSItem> items = Inventory.findList(handlerXML.get().getWithdrawingItems().get(0));
 		if (items != null && deselect()) {
-			for (RSItem item : items) {
-				if (!item.click()) {
+			RSItem item = null;
+			int ClickCounter = items.size(), rand = General.random(84, 140);
+			RSItem[] tempArray = new RSItem[items.size()]; items.toArray(tempArray);
+			for (int i = 0; i < tempArray.length; i++) {
+				item = tempArray[i];
+				
+				// Skip a herb or two once in a while.
+				if (tempArray.length > i+2 && General.random(0, rand) == 0) {
+					i = i + General.random(1, 2);
+					item = tempArray[i];
+				}
+				
+				if (item == null || !item.click()) {
 					General.println("AutoGeneral_Error - Could not click the desired item.");
 					return false;
 				}
 				else if (track) {
 					Variables.get().addToCreated(1);
 				}
-
+				
 				General.sleep(delay_min, delay_max);
+				ClickCounter--;
+				items.set(i, null);
+			}
+			
+			while (items.remove(null)) {
+				continue;
+			}
+
+			if (ClickCounter != 0) {
+				for (RSItem item_3 : items) {
+					
+					if (item_3 == null || !item_3.click()) {
+						General.println("AutoGeneral_Error - Could not click the desired item.");
+						return false;
+					}
+					else if (track) {
+						Variables.get().addToCreated(1);
+					}
+					
+					General.sleep(delay_min, delay_max);
+				}
 			}
 			
 			return true;
@@ -147,40 +170,80 @@ public class jGeneral {
 	public boolean clickMix(int itemID, int itemID_2, int finishedItem, boolean track) {
 		RSItem item = RS.Inventory_find(itemID);
 		RSItem item_2 = RS.Inventory_find(itemID_2);
+		
+		RSItem[] list  = Inventory.find(itemID);
+		if (list.length > 2 && General.random(0, 9) == 0) {
+			item = list[General.random(1, 2)];
+		}
+		
+		RSItem[] list2  = Inventory.find(itemID_2);
+		if (list2.length > 2 && General.random(0, 9) == 0) {
+			item_2 = list2[General.random(1, 2)];
+		}
+		
 		if (item != null && item_2 != null && deselect()) {
-			if (item.click()) {
-				shortDynamicSleep();
-				if (item_2.click()) {
-					defaultDynamicSleep();
-					int inv_length = Inventory.getAll().length;
-					Mouse.clickBox(230,403,285,447,1);
-					General.sleep(1000);
-
-					while (Timing.waitCondition(() -> {
-						General.sleep(50);
-						return Player.getAnimation() == 363;
-					}, 550)) {
-						continue;
-					}
-					
-					if (!waitInventory_fast(inv_length)) {
-						General.println("AutoGeneral_Error - Could not click the box.");
-						return false;
-					}
-					
-					if (track)
-						Variables.get().addToCreated(Inventory.getCount(finishedItem));
-					
-					return true;
+			if (attemptMix(item, item_2)) {
+				if (!Timing.waitCondition(() -> {
+					General.sleep(200, 400);
+					return Interfaces.get(270, 14) != null;
+				}, 5000)) {
+					General.println("AutoGeneral_Error - Could not find the box.");
+					return false;
 				}
+					
+				if (!Timing.waitCondition(() -> {
+					Interfaces.get(270, 14).click();
+					General.sleep(1000);
+					return Interfaces.get(270, 14) == null;
+				}, 5000)) {
+					General.println("AutoGeneral_Error - Could not click the box.");
+					return false;
+				}
+
+				if (!Timing.waitCondition(() -> {
+					General.sleep(100);
+					return Inventory.find(itemID).length == 0 || Inventory.find(itemID_2).length == 0 ;
+				}, General.random(11000, 13000))) {
+					General.println("AutoGeneral_Error - Couldn't create all the potions.");
+					return false;
+				}
+					
+				if (track)
+					Variables.get().addToCreated(Inventory.getCount(finishedItem));
+					
+				defaultDynamicSleep();
+				return true;
 			}
-			
-			General.println("AutoGeneral_Error - Could not click the desired item.");
+
 			return false;
 		}
 		
 		General.println("AutoGeneral_Error - Could not find the item.");
 		return false;
+	}
+
+	public boolean attemptMix(RSItem item, RSItem item_2) {
+		if (!Timing.waitCondition(() -> {			
+			item.click();
+			General.sleep(200, 300);
+			return Game.getItemSelectionState() == 1;
+		}, General.random(2000, 3000))) {
+			General.println("AutoGeneral_Error - Could not click the desired item.");
+			return false;
+		}
+		
+		shortDynamicSleep();
+		
+		if (!Timing.waitCondition(() -> {
+			item_2.click();
+			General.sleep(200, 300);
+			return Game.getItemSelectionState() == 0;
+		}, General.random(2000, 3000))) {
+			General.println("AutoGeneral_Error - Could not click the desired item.");
+			return false;
+		}
+		
+		return true;
 	}
 	
 	public void superDynamicSleeper(int min_often, int max_often, int min_seldom, int max_seldom, int min_occurence, int max_occurence, boolean shift)

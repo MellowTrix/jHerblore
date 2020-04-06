@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
 		category = "Herblore",
 		name = "jHerblore",
 		description = "Add Jaywalker#9754 on Discord for assistance.",
-		version = 1.30)
+		version = 1.31)
 
 public class jHerblore extends Script implements Arguments, Painting, PaintInfo, Starting, Ending {
 
@@ -183,7 +183,9 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     	while(true) {
     		try {
     			Banker.walkToBank(Walker.get().condition_enableRun);
-    			Banker.depositItemsAll();
+    			if (!Banker.depositItemsAll() && !Banker.depositItemsAll()) // Attempt depositing once more if it for some very odd reason it failed the first time.(happens very rarely)
+    				return;
+ 
     			if (Banker.withdraw_stackException(handlerXML.get().getWithdrawingItems().get(0), 28)) {
     				if (Banker.close()) {
     					if (!jGeneral.get().clickAll(0, 25, true))
@@ -258,7 +260,9 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     	while(true) {
     		try {
     			Banker.walkToBank(Walker.get().condition_enableRun);
-    			Banker.depositItemsAll();    			
+    			if (!Banker.depositItemsAll() && !Banker.depositItemsAll()) // Attempt depositing once more if it for some very odd reason it failed the first time.(happens very rarely)
+    				return;
+
     			if (Banker.withdraw_stackException(14, handlerXML.get().getWithdrawingItems())) {
     				if (Banker.close()) {
     					if (!jGeneral.get().clickMix(handlerXML.get().getWithdrawingItems().get(0), 227, getUnfPot(handlerXML.get().getWithdrawingItems().get(0)), true))
