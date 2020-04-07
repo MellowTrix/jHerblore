@@ -46,7 +46,7 @@ import java.util.regex.Pattern;
 		category = "Herblore",
 		name = "jHerblore",
 		description = "Add Jaywalker#9754 on Discord for assistance.",
-		version = 1.32)
+		version = 1.4)
 
 public class jHerblore extends Script implements Arguments, Painting, PaintInfo, Starting, Ending {
 
