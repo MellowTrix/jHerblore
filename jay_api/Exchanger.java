@@ -165,14 +165,14 @@ public class Exchanger {
 		List<Integer> prices = new ArrayList<Integer>();
 		int requiredCash = 0;
 		for (int i = 0; i < ids.size(); i++) {
-			if (handlerXML.get().getWithdrawingItems().get(i) == 227) {
-				prices.add((int) (GrandExchangeService.tryGetPrice(handlerXML.get().getWithdrawingItems().get(i)).get() * 2.0f));
-				requiredCash += GrandExchangeService.tryGetPrice(handlerXML.get().getWithdrawingItems().get(i)).get() * 2.0f;
+			if (ids.get(i) == 227) {
+				prices.add((int) (GrandExchangeService.tryGetPrice(ids.get(i)).get() * 2.0f));
+				requiredCash += GrandExchangeService.tryGetPrice(ids.get(i)).get() * 2.0f;
 				continue;
 			}
 
-			prices.add((int) (GrandExchangeService.tryGetPrice(handlerXML.get().getWithdrawingItems().get(i)).get() * multiplier));
-			requiredCash += GrandExchangeService.tryGetPrice(handlerXML.get().getWithdrawingItems().get(i)).get() * multiplier;
+			prices.add((int) (GrandExchangeService.tryGetPrice(ids.get(i)).get() * multiplier));
+			requiredCash += GrandExchangeService.tryGetPrice(ids.get(i)).get() * multiplier;
 		}
 		
 		int currCash = jGeneral.get().getCash(false);
@@ -207,7 +207,7 @@ public class Exchanger {
 		
 			// Sets up the offer and confirms it.
 			if(GEInterfaces.SEARCH_ITEM_INPUT_TEXT.isVisible()) {
-				String item = RSItemDefinition.get(handlerXML.get().getWithdrawingItems().get(j)).getName();
+				String item = RSItemDefinition.get(ids.get(j)).getName();
 				if (item != null) {
 					if (!Timing.waitCondition(() -> {
 						General.sleep(50);

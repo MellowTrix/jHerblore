@@ -78,10 +78,11 @@ public class jaysgui {
 	private void initialize(File file) throws IOException {
 		
 		String[] settings = {"true", "-1", "false", "true", "true", "-1", "28", "true", "-1", "false", "-1", "30", "-49"};
-		String[] herblore_settings = {"0"};
+		String[] herblore_settings = {"0", "0"};
 		String[] herbs = {"199", "201", "203", "205", "207", "3049", "209", "211", "213", "3051", "215", "2485", "217", "219"};
 		
 		herblore_settings[0] = handlerXML.get().getSetting(file, "HERBLORE", "herblore_method");
+		herblore_settings[1] = handlerXML.get().getSetting(file, "HERBLORE", "herblore_potion");
 		
 		String path = Util.getAppDataDirectory().getPath();
 		ImageIcon save_icon = new ImageIcon(path + File.separator + "bin" + File.separator + "scripts" +  File.separator + "jay_api" +
@@ -129,7 +130,11 @@ public class jaysgui {
 		comboBox.setModel(new DefaultComboBoxModel(new String[] {"Guam leaf(Level 3)", "Marrentill(Level 5)", "Tarromin(Level 11)", "Harralander(Level 20)", "Ranarr weed(Level 25)", "Toadflax(Level 30)", "Irit leaf(Level 40)", "Avantoe(Level 48)", "Kwuarm(Level 54)", "Snapdragon(Level 59)", "Cadantine(Level 65)", "Lantadyme(Level 67)", "Dwarf weed(Level 70)", "Torstol(Level 75)"}));
 		DefaultComboBoxModel comboBoxModel = (DefaultComboBoxModel) comboBox.getModel();
 		setComboBoxModel(comboBoxModel_1, comboBox, comboBoxModel);
-		setComboBoxModelItem(file, comboBoxModel, herbs);
+
+		if (Integer.parseInt(handlerXML.get().getSetting(file, "HERBLORE", "herblore_method")) == 0)
+			comboBoxModel.setSelectedItem(comboBoxModel.getElementAt(Integer.parseInt(herblore_settings[1])));
+		else
+			setComboBoxModelItem(file, comboBoxModel, herbs);
 
 		comboBox_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -187,7 +192,6 @@ public class jaysgui {
 				if (skipCheckBox.isSelected())		
 					handlerXML.get().skipGUI(file, true);
 
-				settings[5] = herbs[comboBoxModel.getIndexOf(comboBoxModel.getSelectedItem())];
 				if (chckbxNewCheckBox.isSelected() && !frmtdtxtfldRestockingAmount.getText().equals("") && !frmtdtxtfldRestockingAmount.getText().startsWith("0")) {
 					settings[9] = "true";
  					settings[10] = frmtdtxtfldRestockingAmount.getText();
@@ -201,6 +205,10 @@ public class jaysgui {
 				settings[12] = spinner_1.getValue().toString();
 				
 				herblore_settings[0] = String.valueOf(comboBoxModel_1.getIndexOf(comboBoxModel_1.getSelectedItem()));
+				if (herblore_settings[0].equals("0"))
+					herblore_settings[1] = String.valueOf(comboBoxModel.getIndexOf(comboBoxModel.getSelectedItem()));
+				else
+					settings[5] = herbs[comboBoxModel.getIndexOf(comboBoxModel.getSelectedItem())];
 				
                 handlerXML.get().parseHerblore(file, settings, herblore_settings);
 					
@@ -345,7 +353,10 @@ public class jaysgui {
 			    	
 			    	comboBoxModel_1.setSelectedItem(comboBoxModel_1.getElementAt(Integer.parseInt(handlerXML.get().getSetting(chooser.getSelectedFile(), "HERBLORE", "herblore_method"))));
 			    	setComboBoxModel(comboBoxModel_1, comboBox, comboBoxModel);
-			    	setComboBoxModelItem(chooser.getSelectedFile(), comboBoxModel, herbs);
+			    	if (Integer.parseInt(handlerXML.get().getSetting(chooser.getSelectedFile(), "HERBLORE", "herblore_method")) == 0)
+			    		comboBoxModel.setSelectedItem(comboBoxModel.getElementAt(Integer.parseInt(handlerXML.get().getSetting(chooser.getSelectedFile(), "HERBLORE", "herblore_potion"))));
+			    	else
+			    		setComboBoxModelItem(chooser.getSelectedFile(), comboBoxModel, herbs);
 			    }
 			}
 		});
@@ -360,8 +371,6 @@ public class jaysgui {
 			        "xml Files", "xml");
 			    chooser.setFileFilter(filter);
 			    if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-
-			    	settings[5] = herbs[comboBoxModel.getIndexOf(comboBoxModel.getSelectedItem())];
 			    	
 					if (chckbxNewCheckBox.isSelected() && !frmtdtxtfldRestockingAmount.getText().equals("") && !frmtdtxtfldRestockingAmount.getText().equals("0")) {
 						settings[9] = "true";
@@ -375,7 +384,11 @@ public class jaysgui {
 					settings[11] = spinner.getValue().toString();
 					settings[12] = spinner_1.getValue().toString();
 					herblore_settings[0] = String.valueOf(comboBoxModel_1.getIndexOf(comboBoxModel_1.getSelectedItem()));
-			    	
+					if (herblore_settings[0].equals("0"))
+						herblore_settings[1] = String.valueOf(comboBoxModel.getIndexOf(comboBoxModel.getSelectedItem()));
+					else
+						settings[5] = herbs[comboBoxModel.getIndexOf(comboBoxModel.getSelectedItem())];
+					
 			    	String saved_file = chooser.getSelectedFile().toString();
 			    	if (!FilenameUtils.isExtension(saved_file, "xml")) {
 			    		saved_file = FilenameUtils.removeExtension(saved_file);
@@ -413,13 +426,14 @@ public class jaysgui {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void setComboBoxModel(DefaultComboBoxModel comboBoxModel_1, JComboBox comboBox, DefaultComboBoxModel comboBoxModel) {
+		String[] mix = {"Attack potion (Level 3)", "Antipoison potion (Level 5)", "Strength potion (Level 12)", "Serum 207 (Level 15)", "Compost potion (Level 21)", "Restore potion (Level 22)", "Energy potion (Level 26)", "Defence potion (Level 30)", "Agility potion (Level 34)", "Combat potion (Level 36)", "Prayer potion (Level 38)", "Super attack (Level 45)", "Superantipoison (Level 48)", "Fishing potion (Level 50)", "Super energy potion (Level 52)", "Hunter potion (Level 53)", "Super strength (Level 55)", "Weapon poison (Level 60)", "Super restore (Level 63)", "Super defence (Level 66)", "Antifire potion (Level 69)", "Ranging potion (Level 72)", "Magic potion (Level 76)", "Zamorak brew (Level 78)", "Saradomin brew (Level 81)", "Anti-venom+ (Level 94)"};
 		String[] mix_unf = {"Guam Potion (unf)(Level 3)", "Marrentill potion (unf)(Level 5)", "Tarromin potion (unf)(Level 11)", "Harralander potion (unf)(Level 20)", "Ranarr potion (unf)(Level 25)", "Toadflax potion (unf)(Level 30)", "Irit potion (unf)(Level 40)", "Avantoe potion (unf)(Level 48)", "Kwuarm potion (unf)(Level 54)", "Snapdragon potion (unf)(Level 59)", "Cadantine potion (unf)(Level 65)", "Lantadyme potion (unf)(Level 67)", "Dwarf weed potion (unf)(Level 70)", "Torstol potion (unf)(Level 75)"};
 		String[] clean = {"Guam leaf(Level 3)", "Marrentill(Level 5)", "Tarromin(Level 11)", "Harralander(Level 20)", "Ranarr weed(Level 25)", "Toadflax(Level 30)", "Irit leaf(Level 40)", "Avantoe(Level 48)", "Kwuarm(Level 54)", "Snapdragon(Level 59)", "Cadantine(Level 65)", "Lantadyme(Level 67)", "Dwarf weed(Level 70)", "Torstol(Level 75)"};
 		
 		int val = comboBoxModel_1.getIndexOf(comboBoxModel_1.getSelectedItem());
 		comboBox.removeAllItems();
 		if (val == 0) {
-			for (String s : mix_unf)
+			for (String s : mix)
 				comboBox.addItem(s);
 		}
 		else if (val == 1) {

@@ -11,6 +11,7 @@ import org.tribot.api2007.Game;
 import org.tribot.api2007.Interfaces;
 import org.tribot.api2007.Inventory;
 import org.tribot.api2007.Magic;
+import org.tribot.api2007.types.RSInterfaceChild;
 import org.tribot.api2007.types.RSItem;
 
 import scripts.jay_api.fluffeespaint.Variables;
@@ -146,6 +147,8 @@ public class jGeneral {
 			}
 
 			if (ClickCounter != 0) {
+				shortDynamicSleep();
+				
 				for (RSItem item_3 : items) {
 					
 					if (item_3 == null || !item_3.click()) {
@@ -167,18 +170,18 @@ public class jGeneral {
 		return false;
 	}
 	
-	public boolean clickMix(int itemID, int itemID_2, int finishedItem, boolean track) {
+	public boolean clickMix(int itemID, int itemID_2, int finishedItem, boolean track, boolean ignoreLvl) {
 		RSItem item = RS.Inventory_find(itemID);
 		RSItem item_2 = RS.Inventory_find(itemID_2);
 		
-		RSItem[] list  = Inventory.find(itemID);
-		if (list.length > 2 && General.random(0, 9) == 0) {
-			item = list[General.random(1, 2)];
+		RSItem[] array  = Inventory.find(itemID);
+		if (array.length > 2 && General.random(0, 9) == 0) {
+			item = array[General.random(1, 2)];
 		}
 		
-		RSItem[] list2  = Inventory.find(itemID_2);
-		if (list2.length > 2 && General.random(0, 9) == 0) {
-			item_2 = list2[General.random(1, 2)];
+		RSItem[] array2  = Inventory.find(itemID_2);
+		if (array2.length > 2 && General.random(0, 9) == 0) {
+			item_2 = array2[General.random(1, 2)];
 		}
 		
 		if (item != null && item_2 != null && deselect()) {
@@ -202,8 +205,14 @@ public class jGeneral {
 
 				if (!Timing.waitCondition(() -> {
 					General.sleep(100);
+					if (!ignoreLvl && handleLevelUp() && 
+					   (Inventory.find(itemID).length != 0 && Inventory.find(itemID_2).length != 0)) {
+						clickMix(itemID, itemID_2, finishedItem, track, ignoreLvl);
+						return true;
+					}
+					
 					return Inventory.find(itemID).length == 0 || Inventory.find(itemID_2).length == 0 ;
-				}, General.random(11000, 13000))) {
+				}, 20000)) {
 					General.println("AutoGeneral_Error - Couldn't create all the potions.");
 					return false;
 				}
@@ -244,6 +253,26 @@ public class jGeneral {
 		}
 		
 		return true;
+	}
+	
+	public boolean handleLevelUp() {
+		RSInterfaceChild inter = Interfaces.get(233, 3);
+		if (inter != null) {
+			defaultDynamicSleep();
+			if (!Timing.waitCondition(() -> {
+				inter.click();
+				General.sleep(200, 500);
+				return Interfaces.get(233, 3) == null;
+			}, 5000)) {
+				General.println("AutoGeneral_Error - Could not discard the level up box.");
+				return false;
+			}
+
+			shortDynamicSleep(); // Adding a little extra sleep ontop of our already short sleep if we managed to close the window.
+			return true;
+		}
+		
+		return false;
 	}
 	
 	public void superDynamicSleeper(int min_often, int max_often, int min_seldom, int max_seldom, int min_occurence, int max_occurence, boolean shift)

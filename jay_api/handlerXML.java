@@ -39,7 +39,7 @@ public class handlerXML {
 	private boolean walking_walktobank = false;
 	private boolean GE_restocking = false;
 	
-	private int GE_restocking_amount = 0, herb_method = 0;
+	private int GE_restocking_amount = 0, herb_method = 0, herb_potion = 0;
 	private float GE_mult_buy = 1.0f, GE_mult_sell = 1.0f;
 
 	private RunescapeBank bank = null;
@@ -84,6 +84,10 @@ public class handlerXML {
     
     public int getHerbMethod() {
     	return herb_method;
+    }
+    
+    public int getHerbPotion() {
+    	return herb_potion;
     }
     
     public float getGE_mult_buy() {
@@ -220,6 +224,10 @@ public class handlerXML {
 				herb_method.appendChild(docs.createTextNode("0"));
 				herb.appendChild(herb_method);
 				
+				Element herb_potion = docs.createElement("herblore_potion");
+				herb_potion.appendChild(docs.createTextNode("0"));
+				herb.appendChild(herb_potion);
+				
 				// SETTINGS STRUCTURE FOR SETTINGS --- END
                
 				saveFile(file, docs); // Write the content into xml file
@@ -307,6 +315,7 @@ public class handlerXML {
 			Element eElement = (Element) doc.getElementsByTagName("HERBLORE").item(0);
 			
 			eElement.getElementsByTagName("herblore_method").item(0).setTextContent(herb[0]);
+			eElement.getElementsByTagName("herblore_potion").item(0).setTextContent(herb[1]);
 			
 			// Parsing complete ------------------------
         
@@ -402,6 +411,7 @@ public class handlerXML {
 		eElement = (Element) doc.getElementsByTagName("HERBLORE").item(0);
 
 		herb_method = Integer.parseInt(eElement.getElementsByTagName("herblore_method").item(0).getTextContent());
+		herb_potion = Integer.parseInt(eElement.getElementsByTagName("herblore_potion").item(0).getTextContent());
 	}
 	
 	public String getSetting(File file, String parent, String setting) {
