@@ -15,6 +15,7 @@ import org.tribot.script.interfaces.Ending;
 import org.tribot.script.interfaces.Painting;
 import org.tribot.script.interfaces.Starting;
 import org.tribot.util.Util;
+
 import scripts.dax_api.api_lib.DaxWalker;
 import scripts.dax_api.api_lib.models.DaxCredentials;
 import scripts.dax_api.api_lib.models.DaxCredentialsProvider;
@@ -35,11 +36,12 @@ import scripts.jay_api.wastedbroGE.GrandExchangeService;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.io.File;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
  
 @ScriptManifest(
 		authors = "Jaywalker",
@@ -242,57 +244,57 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     	switch(id) {
     		// Ingredients for:
     		case 0: // Attack potion
-    			return Arrays.asList(91, 221);
+    			return Stream.of(91, 221).collect(Collectors.toList());
     		case 1: // Antipoison
-    			return Arrays.asList(93, 235);
+    			return Stream.of(93, 235).collect(Collectors.toList());
     		case 2: // Strength potion
-    			return Arrays.asList(95, 225);
+    			return Stream.of(95, 225).collect(Collectors.toList());
     		case 3: // Serum 207
-    			return Arrays.asList(95, 592);
+    			return Stream.of(95, 592).collect(Collectors.toList());
     		case 4: // Compost potion
-    			return Arrays.asList(97, 21622);
+    			return Stream.of(97, 21622).collect(Collectors.toList());
     		case 5: // Restore potion
-    			return Arrays.asList(97, 223);
+    			return Stream.of(97, 223).collect(Collectors.toList());
     		case 6: // Energy potion
-    			return Arrays.asList(97, 1975);
+    			return Stream.of(97, 1975).collect(Collectors.toList());
     		case 7: // Defence potion
-    			return Arrays.asList(99, 239);
+    			return Stream.of(99, 239).collect(Collectors.toList());
     		case 8: // Agility potion
-    			return Arrays.asList(3002, 2152);
+    			return Stream.of(3002, 2152).collect(Collectors.toList());
     		case 9: // Combat potion
-    			return Arrays.asList(97, 9736);
+    			return Stream.of(97, 9736).collect(Collectors.toList());
     		case 10: // Prayer potion
-    			return Arrays.asList(99, 231);
+    			return Stream.of(99, 231).collect(Collectors.toList());
     		case 11: // Super attack
-    			return Arrays.asList(101, 221);
+    			return Stream.of(101, 221).collect(Collectors.toList());
     		case 12: // Superantipoison
-    			return Arrays.asList(101, 235);
+    			return Stream.of(101, 235).collect(Collectors.toList());
     		case 13: // Fishing potion
-    			return Arrays.asList(103, 231);
+    			return Stream.of(103, 231).collect(Collectors.toList());
     		case 14: // Super energy potion
-    			return Arrays.asList(103, 2970);
+    			return Stream.of(103, 2970).collect(Collectors.toList());
     		case 15: // Hunter potion
-    			return Arrays.asList(103, 1011);
+    			return Stream.of(103, 1011).collect(Collectors.toList());
     		case 16: // Super strength
-    			return Arrays.asList(105, 225);
+    			return Stream.of(105, 225).collect(Collectors.toList());
     		case 17: // Weapon poison
-    			return Arrays.asList(105, 241);
+    			return Stream.of(105, 241).collect(Collectors.toList());
     		case 18: // Super restore
-    			return Arrays.asList(3004, 223);
+    			return Stream.of(3004, 223).collect(Collectors.toList());
     		case 19: // Super defence
-    			return Arrays.asList(107, 239);
+    			return Stream.of(107, 239).collect(Collectors.toList());
     		case 20: // Antifire potion
-    			return Arrays.asList(2483, 241);
+    			return Stream.of(2483, 241).collect(Collectors.toList());
     		case 21: // Ranging potion
-    			return Arrays.asList(109, 245);
+    			return Stream.of(109, 245).collect(Collectors.toList());
     		case 22: // Magic potion
-    			return Arrays.asList(2483, 3138);
+    			return Stream.of(2483, 3138).collect(Collectors.toList());
     		case 23: // Zamorak brew
-    			return Arrays.asList(11, 247);
+    			return Stream.of(111, 247).collect(Collectors.toList());
     		case 24: // Saradomin brew
-    			return Arrays.asList(3002, 6693);
+    			return Stream.of(3002, 6693).collect(Collectors.toList());
     		case 25: // Anti-venom+
-    			return Arrays.asList(12905, 111);
+    			return Stream.of(12905, 111).collect(Collectors.toList());
     		default:
     			return null;
     	}
@@ -314,25 +316,16 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     					return;
     			}
     			else if (handlerXML.get().isRestocking()) {
-    				if (Player.getPosition().distanceTo(new RSTile(3165, 3487, 0)) > 7) {			
-    					if (Player.getPosition().distanceTo(new RSTile(3165, 3487, 0)) > 60) { // If we are a bit further away from GE then check the bank for RoW, will speed up the traveling.
-    						if (!Banker.withdraw("Ring of wealth (1)", 1)) {
-    							if (!Banker.withdraw("Ring of wealth (2)", 1)) {
-    								if (!Banker.withdraw("Ring of wealth (3)", 1)) {
-    									if (!Banker.withdraw("Ring of wealth (4)", 1)) {
-    										Banker.withdraw("Ring of wealth (5)", 1);
-    									}
-    								}
-    							}
-    						}
-    					}
-    					
-    					if (!Banker.walkToBank(RunescapeBank.GRAND_EXCHANGE, Walker.get().condition_enableRun))
-    						return;
+				
+    				if (Inventory.getAll().length != 0) {
+    					Banker.depositItemsAll();
     				}
 
+    				if (!walktToGe())
+    					return;
+
     				if (Exchanger.buy(handlerXML.get().getWithdrawingItems().get(0), GrandExchangeService.tryGetPrice(handlerXML.get().getWithdrawingItems().get(0)).get(), handlerXML.get().getRestockingAmount(), handlerXML.get().getGE_mult_buy())) {
-    					if (!Exchanger.collectBuy_removeProfit(handlerXML.get().getWithdrawingItems().get(0), handlerXML.get().getRestockingAmount()))
+    					if (!Exchanger.get().collectBuy_removeProfit(handlerXML.get().getWithdrawingItems().get(0), handlerXML.get().getRestockingAmount()))
     						return;
     				}
     				else if ((jGeneral.get().getCash(true) + jGeneral.get().getCash(false)) < (GrandExchangeService.tryGetPrice(handlerXML.get().getWithdrawingItems().get(0)).get()
@@ -372,8 +365,9 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     }
    
     public void mixing_unf() {
+    	// Gets the clean version of the herb and adds it to the list along with vial of water, then removes the grimy herb from the list.
 		handlerXML.get().getWithdrawingItems().add(getCleanHerb(handlerXML.get().getWithdrawingItems().get(0)));
-    	handlerXML.get().getWithdrawingItems().add(227);
+    	handlerXML.get().getWithdrawingItems().add(227); // Vial of water
     	handlerXML.get().getWithdrawingItems().remove(0);
 
     	while(true) {
@@ -396,25 +390,11 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     					Banker.depositItemsAll();
     				}
     				
-    				if (Player.getPosition().distanceTo(new RSTile(3165, 3487, 0)) > 7) {			
-    					if (Player.getPosition().distanceTo(new RSTile(3165, 3487, 0)) > 60) { // If we are a bit further away from GE then check the bank for RoW, will speed up the traveling.
-    						if (!Banker.withdraw("Ring of wealth (1)", 1)) {
-    							if (!Banker.withdraw("Ring of wealth (2)", 1)) {
-    								if (!Banker.withdraw("Ring of wealth (3)", 1)) {
-    									if (!Banker.withdraw("Ring of wealth (4)", 1)) {
-    										Banker.withdraw("Ring of wealth (5)", 1);
-    									}
-    								}
-    							}
-    						}
-    					}
-    					
-    					if (!Banker.walkToBank(RunescapeBank.GRAND_EXCHANGE, Walker.get().condition_enableRun))
-    						return;
-    				}
+    				if (!walktToGe())
+    					return;
 
-    				if (Exchanger.buy(handlerXML.get().getWithdrawingItems(), handlerXML.get().getRestockingAmount(), handlerXML.get().getGE_mult_buy())) {
-    					if (!Exchanger.collectBuy_removeProfit(handlerXML.get().getWithdrawingItems().get(0), handlerXML.get().getRestockingAmount()) || !Exchanger.collectBuy_removeProfit(227, handlerXML.get().getRestockingAmount()))
+    				if (Exchanger.get().buy(handlerXML.get().getWithdrawingItems(), handlerXML.get().getRestockingAmount(), handlerXML.get().getGE_mult_buy())) {
+    					if (!Exchanger.get().collectBuy_removeProfit(handlerXML.get().getWithdrawingItems().get(0), handlerXML.get().getRestockingAmount()) || !Exchanger.get().collectBuy_removeProfit(227, handlerXML.get().getRestockingAmount()))
     						return;
     				}
     				else if ((jGeneral.get().getCash(true) + jGeneral.get().getCash(false)) < (GrandExchangeService.tryGetPrice(handlerXML.get().getWithdrawingItems().get(0)).get()
@@ -479,25 +459,11 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     					Banker.depositItemsAll();
     				}
     				
-    				if (Player.getPosition().distanceTo(new RSTile(3165, 3487, 0)) > 7) {			
-    					if (Player.getPosition().distanceTo(new RSTile(3165, 3487, 0)) > 60) { // If we are a bit further away from GE then check the bank for RoW, will speed up the traveling.
-    						if (!Banker.withdraw("Ring of wealth (1)", 1)) {
-    							if (!Banker.withdraw("Ring of wealth (2)", 1)) {
-    								if (!Banker.withdraw("Ring of wealth (3)", 1)) {
-    									if (!Banker.withdraw("Ring of wealth (4)", 1)) {
-    										Banker.withdraw("Ring of wealth (5)", 1);
-    									}
-    								}
-    							}
-    						}
-    					}
-    					
-    					if (!Banker.walkToBank(RunescapeBank.GRAND_EXCHANGE, Walker.get().condition_enableRun))
-    						return;
-    				}
+    				if (!walktToGe())
+    					return;
 
-    				if (Exchanger.buy(mixingItemsList, handlerXML.get().getRestockingAmount(), handlerXML.get().getGE_mult_buy())) {
-    					if (!Exchanger.collectBuy_removeProfit(mixingItemsList.get(0), handlerXML.get().getRestockingAmount()) || !Exchanger.collectBuy_removeProfit(mixingItemsList.get(1), handlerXML.get().getRestockingAmount()))
+    				if (Exchanger.get().buy(mixingItemsList, handlerXML.get().getRestockingAmount(), handlerXML.get().getGE_mult_buy())) {
+    					if (!Exchanger.get().collectBuy_removeProfit(mixingItemsList.get(0), handlerXML.get().getRestockingAmount()) || !Exchanger.get().collectBuy_removeProfit(mixingItemsList.get(1), handlerXML.get().getRestockingAmount()))
     						return;
     				}
     				else if ((jGeneral.get().getCash(true) + jGeneral.get().getCash(false)) < ((GrandExchangeService.tryGetPrice(mixingItemsList.get(0)).get()
@@ -533,6 +499,27 @@ public class jHerblore extends Script implements Arguments, Painting, PaintInfo,
     			return;
     		}
     	}
+    }
+ 
+    public boolean walktToGe() {
+		if (Player.getPosition().distanceTo(new RSTile(3165, 3487, 0)) > 7) {			
+			if (Player.getPosition().distanceTo(new RSTile(3165, 3487, 0)) > 60) { // If we are a bit further away from GE then check the bank for RoW, will speed up the traveling.
+				if (!Banker.withdraw("Ring of wealth (1)", 1)) {
+					if (!Banker.withdraw("Ring of wealth (2)", 1)) {
+						if (!Banker.withdraw("Ring of wealth (3)", 1)) {
+							if (!Banker.withdraw("Ring of wealth (4)", 1)) {
+								Banker.withdraw("Ring of wealth (5)", 1);
+							}
+						}
+					}
+				}
+			}
+			
+			if (!Banker.walkToBank(RunescapeBank.GRAND_EXCHANGE, Walker.get().condition_enableRun))
+				return false;
+		}
+		
+		return true;
     }
     
 	@Override

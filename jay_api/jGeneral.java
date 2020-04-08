@@ -32,6 +32,66 @@ public class jGeneral {
 		return util;
 	}
 	
+	public void performABC() {
+		Count = 1;
+
+		if (util.shouldCheckTabs())
+			util.checkTabs();
+
+		if (util.shouldCheckXP())	
+			util.checkXP();
+
+		if (util.shouldExamineEntity())
+			util.examineEntity();
+
+		if (util.shouldMoveMouse())
+			util.moveMouse();
+
+		if (util.shouldPickupMouse())
+			util.pickupMouse();
+
+		if (util.shouldRightClick())
+			util.rightClick();
+
+		if (util.shouldRotateCamera())
+			util.rotateCamera();
+
+		if (util.shouldLeaveGame())
+			util.leaveGame();
+
+		Count = 0;
+	}
+	
+	public void performAB2C() {
+		Count = 1;
+
+		if (util.shouldCheckTabs())
+			util.checkTabs();
+
+		if (util.shouldCheckXP())	
+			util.checkXP();
+
+		if (util.shouldExamineEntity())
+			util.examineEntity();
+
+		if (util.shouldMoveMouse())
+			util.moveMouse();
+
+		if (util.shouldPickupMouse())
+			util.pickupMouse();
+
+		if (util.shouldRightClick())
+			util.rightClick();
+
+		if (util.shouldRotateCamera())
+			util.rotateCamera();
+
+		if (util.shouldLeaveGame())
+			util.leaveGame();
+
+		Count = 0;
+	}
+	
 	public int getCount() {
 		return Count;
 	}
@@ -186,29 +246,37 @@ public class jGeneral {
 		
 		if (item != null && item_2 != null && deselect()) {
 			if (attemptMix(item, item_2)) {
-				if (!Timing.waitCondition(() -> {
-					General.sleep(200, 400);
-					return Interfaces.get(270, 14) != null;
-				}, 5000)) {
-					General.println("AutoGeneral_Error - Could not find the box.");
-					return false;
-				}
+				
+				if (Inventory.getCount(itemID) != 1 && Inventory.getCount(itemID_2) != 1) {
+					if (!Timing.waitCondition(() -> {
+						General.sleep(200, 400);
+						return Interfaces.get(270, 14) != null;
+					}, 5000)) {
+						General.println("AutoGeneral_Error - Could not find the box.");
+						return false;
+					}
 					
-				if (!Timing.waitCondition(() -> {
-					Interfaces.get(270, 14).click();
-					General.sleep(1000);
-					return Interfaces.get(270, 14) == null;
-				}, 5000)) {
-					General.println("AutoGeneral_Error - Could not click the box.");
-					return false;
+					if (!Timing.waitCondition(() -> {
+						Interfaces.get(270, 14).click();
+						General.sleep(1000);
+						return Interfaces.get(270, 14) == null;
+					}, 5000)) {
+						General.println("AutoGeneral_Error - Could not click the box.");
+						return false;
+					}
 				}
 
+				Count = 0;
 				if (!Timing.waitCondition(() -> {
+					//if (Count != 1) {
+						//performABC(); // Perform ABC stuff here
 					General.sleep(100);
 					if (!ignoreLvl && handleLevelUp() && 
 					   (Inventory.find(itemID).length != 0 && Inventory.find(itemID_2).length != 0)) {
-						clickMix(itemID, itemID_2, finishedItem, track, ignoreLvl);
-						return true;
+						if (clickMix(itemID, itemID_2, finishedItem, track, ignoreLvl))
+							return true;
+						
+						return false;
 					}
 					
 					return Inventory.find(itemID).length == 0 || Inventory.find(itemID_2).length == 0 ;

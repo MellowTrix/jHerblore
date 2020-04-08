@@ -27,6 +27,14 @@ import org.tribot.api2007.types.RSInterface;
 
 public class Exchanger {
 	
+    private static final Exchanger EXCHANGER = new Exchanger();
+    public static Exchanger get() {
+        return EXCHANGER;
+    }
+    
+    private int skipBuy = 0;
+    private List<Integer> SkippedItemList = new ArrayList<Integer>();
+
 	public static boolean withdrawGP(int amount) {
 
 		if (GrandExchange.getWindowState() != null) {
@@ -155,7 +163,7 @@ public class Exchanger {
 	
 	// The code for buying and selling differs a lot because tribots offer API sometimes selects wrong item -
 	// - to buy if they part of their name of contained in another item. So we had to code our own offering method.
-	public static boolean buy(List<Integer> ids, int amount, float multiplier) {
+	public boolean buy(List<Integer> ids, int amount, float multiplier) {
 
 		if (ids.size() == 0) {
 			General.println("AutoGE_Error - List is empty.");
@@ -164,17 +172,31 @@ public class Exchanger {
 		
 		List<Integer> prices = new ArrayList<Integer>();
 		int requiredCash = 0;
+
+		skipBuy = -1;
 		for (int i = 0; i < ids.size(); i++) {
-			if (ids.get(i) == 227) {
+			RSItem bankItem = RS.Banking_find(ids.get(i));
+			if (bankItem != null && bankItem.getStack() >= amount) {
+				skipBuy = i;
+				prices.add(0);
+				continue;
+			}
+			
+			if (ids.get(i) == 227) { // Vial of water
 				prices.add((int) (GrandExchangeService.tryGetPrice(ids.get(i)).get() * 2.0f));
 				requiredCash += GrandExchangeService.tryGetPrice(ids.get(i)).get() * 2.0f;
+				continue;
+			}
+			else if (ids.get(i) == 221) { // Eye of newt
+				prices.add((int) (GrandExchangeService.tryGetPrice(ids.get(i)).get() * 5.0f));
+				requiredCash += GrandExchangeService.tryGetPrice(ids.get(i)).get() * 5.0f;
 				continue;
 			}
 
 			prices.add((int) (GrandExchangeService.tryGetPrice(ids.get(i)).get() * multiplier));
 			requiredCash += GrandExchangeService.tryGetPrice(ids.get(i)).get() * multiplier;
 		}
-		
+
 		int currCash = jGeneral.get().getCash(false);
 		if ((currCash < requiredCash*amount && !withdrawGP(requiredCash*amount - currCash)) ||
 			!open() || !jGeneral.get().deselect()) // deselect() In case GE was already open and we had a spell selected.
@@ -183,6 +205,9 @@ public class Exchanger {
 		jGeneral.get().defaultDynamicSleep();
 
 		for (int j = 0; j < ids.size(); j++) {
+			if (skipBuy == j)
+				continue;
+				
 			// Opens up the buy window.
 			for(int i = 7; i < 15 ; i++) {
 				RSInterface type = Interfaces.get(465, i, 16);
@@ -229,6 +254,7 @@ public class Exchanger {
 								jGeneral.get().shortDynamicSleep();
 								if (GrandExchange.confirmOffer(true)) {
 									jGeneral.get().defaultDynamicSleep();
+									SkippedItemList.add(ids.get(j));
 									continue;
 								}
 							}
@@ -277,8 +303,19 @@ public class Exchanger {
 		return sell(id, (int) (price*multiplier), amount);
 	}
 	
-	public static boolean collectBuy(int id, int amount) {
-
+	public boolean collectBuy(int id, int amount) {
+		boolean skip = false;
+		if (SkippedItemList.size() > 0) {
+			skip = true;
+			for (int i : SkippedItemList) {
+				if (i == id)
+					skip = false;
+			}
+		}
+		
+		if (skip)
+			return true;
+		
 		if (open() && jGeneral.get().deselect()) {
 
 			if (!Timing.waitCondition(() -> {
@@ -291,8 +328,17 @@ public class Exchanger {
 			if (items != null && GrandExchange.collectItems(COLLECT_METHOD.BANK, items)) {
 				if (RS.getItem_specific(items, 995) != null)
 					jGeneral.get().waitInventory(Inventory.getAll().length);
-					
+
 				jGeneral.get().defaultDynamicSleep();
+				if (SkippedItemList.size() > 0) {
+					for (int i : SkippedItemList) {
+						General.println(i);
+						if (i == id)
+							return true;
+					}
+
+					SkippedItemList.remove(SkippedItemList.indexOf(id));
+				}
 				return true;
 			}
 					
@@ -303,8 +349,19 @@ public class Exchanger {
 	}
 	
 	// If we want to subtract profit.
-	public static boolean collectBuy_removeProfit(int id, int amount) {
-
+	public boolean collectBuy_removeProfit(int id, int amount) {
+		boolean skip = false;
+		if (SkippedItemList.size() > 0) {
+			skip = true;
+			for (int i : SkippedItemList) {
+				if (i == id)
+					skip = false;
+			}
+		}
+		
+		if (skip)
+			return true;
+			
 		if (open() && jGeneral.get().deselect()) {
 
 			if (!Timing.waitCondition(() -> {
@@ -323,6 +380,15 @@ public class Exchanger {
 				
 				jGeneral.get().waitInventory(Inventory.getAll().length);				
 				jGeneral.get().defaultDynamicSleep();
+				if (SkippedItemList.size() > 0) {
+					for (int i : SkippedItemList) {
+						General.println(i);
+						if (i == id)
+							return true;
+					}
+
+					SkippedItemList.remove(SkippedItemList.indexOf(id));
+				}
 				return true;
 			}
 					
