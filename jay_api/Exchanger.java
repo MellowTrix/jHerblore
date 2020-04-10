@@ -237,11 +237,11 @@ public class Exchanger {
 					if (!Timing.waitCondition(() -> {
 						General.sleep(50);
 						return !Interfaces.get(162, 45).isHidden();
-					}, General.random(2000, 3000))) {
+					}, General.random(8000, 10000))) {
 						General.println("AutoGE_Error - Failed to get ITEM_INPUT_TEXT_BOX.");
 						return false;
 					}
-					
+
 					Keyboard.typeString(item);
 					if(Timing.waitCondition(() -> {
 						General.sleep(200);
@@ -382,7 +382,6 @@ public class Exchanger {
 				jGeneral.get().defaultDynamicSleep();
 				if (SkippedItemList.size() > 0) {
 					for (int i : SkippedItemList) {
-						General.println(i);
 						if (i == id)
 							return true;
 					}

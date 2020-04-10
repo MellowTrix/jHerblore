@@ -233,7 +233,7 @@ public class jGeneral {
 				}
 
 				if (!Timing.waitCondition(() -> {
-					performABC(); // Perform ABC stuff here whilst we are idling
+					//performABC(); // For some reason the abc doesnt work and just breaks the script.
 					General.sleep(100);
 					if (!ignoreLvl && handleLevelUp() && 
 					   (Inventory.find(itemID).length != 0 && Inventory.find(itemID_2).length != 0)) {
