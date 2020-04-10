@@ -26,15 +26,13 @@ public class jGeneral {
 	
 	private int Count = 0;
 	
-	private final ABCUtil util = new ABCUtil();
+	private ABCUtil util = new ABCUtil();
 	
 	public ABCUtil getUtil() {
 		return util;
 	}
 	
 	public void performABC() {
-		Count = 1;
-
 		if (util.shouldCheckTabs())
 			util.checkTabs();
 
@@ -58,38 +56,6 @@ public class jGeneral {
 
 		if (util.shouldLeaveGame())
 			util.leaveGame();
-
-		Count = 0;
-	}
-	
-	public void performAB2C() {
-		Count = 1;
-
-		if (util.shouldCheckTabs())
-			util.checkTabs();
-
-		if (util.shouldCheckXP())	
-			util.checkXP();
-
-		if (util.shouldExamineEntity())
-			util.examineEntity();
-
-		if (util.shouldMoveMouse())
-			util.moveMouse();
-
-		if (util.shouldPickupMouse())
-			util.pickupMouse();
-
-		if (util.shouldRightClick())
-			util.rightClick();
-
-		if (util.shouldRotateCamera())
-			util.rotateCamera();
-
-		if (util.shouldLeaveGame())
-			util.leaveGame();
-
-		Count = 0;
 	}
 	
 	public int getCount() {
@@ -266,10 +232,8 @@ public class jGeneral {
 					}
 				}
 
-				Count = 0;
 				if (!Timing.waitCondition(() -> {
-					//if (Count != 1) {
-						//performABC(); // Perform ABC stuff here
+					performABC(); // Perform ABC stuff here whilst we are idling
 					General.sleep(100);
 					if (!ignoreLvl && handleLevelUp() && 
 					   (Inventory.find(itemID).length != 0 && Inventory.find(itemID_2).length != 0)) {

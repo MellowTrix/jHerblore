@@ -48,7 +48,7 @@ import java.util.stream.Stream;
 		category = "Herblore",
 		name = "jHerblore",
 		description = "Add Jaywalker#9754 on Discord for assistance.",
-		version = 1.4)
+		version = 1.41)
 
 public class jHerblore extends Script implements Arguments, Painting, PaintInfo, Starting, Ending {
 
